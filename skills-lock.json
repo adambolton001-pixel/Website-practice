@@ -16,6 +16,36 @@
       "sourceType": "local",
       "computedHash": "3fa7ea60170023ad8268bf9fd734ea75dd404279a2ef8ddf5abaa1102ad8e5f4"
     },
+    "ckm:banner-design": {
+      "source": "/tmp/uiux-skill/ui-ux-pro-max-skill-main",
+      "sourceType": "local",
+      "computedHash": "e2a35756abdbdc3a9814fc6e1a68e538ee916361afd0e6bfd9478ce250d6e401"
+    },
+    "ckm:brand": {
+      "source": "/tmp/uiux-skill/ui-ux-pro-max-skill-main",
+      "sourceType": "local",
+      "computedHash": "89c8579d232e6e14152a8b898d49eb94f59aa7288ed8ca103cd3b38cb082e00a"
+    },
+    "ckm:design": {
+      "source": "/tmp/uiux-skill/ui-ux-pro-max-skill-main",
+      "sourceType": "local",
+      "computedHash": "2b0baeb7fd76fd94f746e0bc6e4ea489db96ec789f4210abd053dbcb01621efd"
+    },
+    "ckm:design-system": {
+      "source": "/tmp/uiux-skill/ui-ux-pro-max-skill-main",
+      "sourceType": "local",
+      "computedHash": "49b8308dc428c66b0983f4b3d102c522c495f62538121064d1e82a040b1afd2c"
+    },
+    "ckm:slides": {
+      "source": "/tmp/uiux-skill/ui-ux-pro-max-skill-main",
+      "sourceType": "local",
+      "computedHash": "536ce8206c26f0ec2e7a00b4dea2f177db7e5f85cea6b6e3ef9c71bcaefce5ce"
+    },
+    "ckm:ui-styling": {
+      "source": "/tmp/uiux-skill/ui-ux-pro-max-skill-main",
+      "sourceType": "local",
+      "computedHash": "9ae38e4e201f338b6150e462b98a2db0f2ae7c180c77e8cfb1d33eba9d33bf33"
+    },
     "claude-api": {
       "source": "/tmp/anthropics-skills",
       "sourceType": "local",
@@ -75,6 +105,11 @@
       "source": "/tmp/anthropics-skills",
       "sourceType": "local",
       "computedHash": "598ddfa9784ae2a8c55be5dbb047b98564d875dea6f4669168a87ae1ea1a4ed3"
+    },
+    "ui-ux-pro-max": {
+      "source": "/tmp/uiux-skill/ui-ux-pro-max-skill-main",
+      "sourceType": "local",
+      "computedHash": "a2d7eab9fd29c7685e10dc0d9acca085e32e817b59b6914c0c1be28a56062fbc"
     },
     "web-artifacts-builder": {
       "source": "/tmp/anthropics-skills",

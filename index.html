@@ -3,392 +3,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXUS.GG — The Pulse of Gaming</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>LOADOUT.GG — The Pulse of Gaming</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    :root {
-      --bg-0: #080A0F;
-      --bg-1: #0E1018;
-      --bg-2: #14171F;
-      --bg-3: #1B1E29;
-      --border: #252835;
-      --gold: #F0A500;
-      --red: #E53935;
-      --green: #1DB954;
-      --blue: #3B5BDB;
-      --text-1: #EDF0F7;
-      --text-2: #8C909E;
-      --text-3: #4E5265;
-      --fd: 'Barlow Condensed', sans-serif;
-      --fb: 'Inter', sans-serif;
-      --fm: 'DM Mono', monospace;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg-0);
-      color: var(--text-1);
-      font-family: var(--fb);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ── HEADER ─────────────────────────────── */
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(8,10,15,0.96);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-    .header-inner {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      gap: 32px;
-    }
-    .logo {
-      font-family: var(--fd);
-      font-weight: 900;
-      font-size: 26px;
-      letter-spacing: -0.5px;
-      color: var(--text-1);
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-    .logo span { color: var(--gold); }
-    nav { display: flex; align-items: center; gap: 2px; flex: 1; }
-    nav a {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--text-2);
-      text-decoration: none;
-      padding: 6px 11px;
-      border-radius: 3px;
-      transition: color 0.15s, background 0.15s;
-    }
-    nav a:hover { color: var(--text-1); background: var(--bg-3); }
-    nav a.active { color: var(--gold); }
-    .header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-    .btn-icon {
-      background: none; border: none; cursor: pointer;
-      color: var(--text-2); padding: 8px; border-radius: 3px;
-      display: flex; align-items: center; transition: color 0.15s;
-    }
-    .btn-icon:hover { color: var(--text-1); }
-    .btn-signin {
-      background: var(--gold); color: #000; border: none; cursor: pointer;
-      font-family: var(--fb); font-size: 11px; font-weight: 700;
-      letter-spacing: 0.09em; text-transform: uppercase;
-      padding: 8px 16px; border-radius: 2px; transition: background 0.15s;
-    }
-    .btn-signin:hover { background: #FFB800; }
-
-    /* ── TICKER ─────────────────────────────── */
-    .ticker {
-      background: var(--gold);
-      overflow: hidden;
-      height: 34px;
-      display: flex;
-      align-items: center;
-    }
-    .ticker-label {
-      background: var(--red);
-      color: #fff;
-      font-family: var(--fm);
-      font-size: 9px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      padding: 0 14px;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .ticker-scroll { overflow: hidden; flex: 1; }
-    .ticker-track {
-      display: flex;
-      white-space: nowrap;
-      animation: tickerMove 50s linear infinite;
-    }
-    .ticker-track:hover { animation-play-state: paused; }
-    .ticker-item {
-      font-family: var(--fb);
-      font-size: 12px;
-      font-weight: 600;
-      color: #000;
-      padding-right: 56px;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .ticker-item::before { content: '▸'; font-size: 9px; opacity: 0.6; }
-    @keyframes tickerMove {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    /* ── LAYOUT ─────────────────────────────── */
-    .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-
-    .section-head {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    .section-title {
-      font-family: var(--fd);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--text-1);
-    }
-    .section-title::before {
-      content: '';
-      display: inline-block;
-      width: 3px; height: 13px;
-      background: var(--gold);
-      margin-right: 8px;
-      vertical-align: middle;
-      border-radius: 1px;
-    }
-    .section-more {
-      margin-left: auto;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: var(--gold);
-      text-decoration: none;
-    }
-
-    /* ── TAGS ────────────────────────────────── */
-    .tag {
-      font-family: var(--fm);
-      font-size: 9px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 3px 7px;
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-    .tag-review  { background: var(--gold); color: #000; }
-    .tag-news    { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); }
-    .tag-preview { background: rgba(59,91,219,0.25); color: #7c9fff; border: 1px solid rgba(59,91,219,0.4); }
-    .tag-hot     { background: var(--red); color: #fff; }
-    .tag-excl    { background: rgba(240,165,0,0.12); color: var(--gold); border: 1px solid rgba(240,165,0,0.28); }
-    .platform {
-      font-family: var(--fm);
-      font-size: 9px;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      padding: 2px 6px;
-      border-radius: 2px;
-      background: var(--bg-3);
-      color: var(--text-3);
-      border: 1px solid var(--border);
-    }
-
-    /* ── SCORE ───────────────────────────────── */
-    .score-inline {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 1px;
-    }
-    .score-n {
-      font-family: var(--fd);
-      font-size: 17px;
-      font-weight: 900;
-      line-height: 1;
-    }
-    .score-d { font-family: var(--fm); font-size: 9px; color: var(--text-3); }
-    .sc-great { color: var(--green); }
-    .sc-good  { color: var(--gold); }
-    .sc-ok    { color: #FF8C00; }
-
-    /* ── GAME ART GRADIENTS ──────────────────── */
-    .ga { width: 100%; height: 100%; position: relative; overflow: hidden; }
-    .ga-elden    { background: linear-gradient(135deg,#1a0533 0%,#4a1a00 55%,#0a0a1a 100%); }
-    .ga-wukong   { background: linear-gradient(135deg,#7B1818 0%,#2a0a00 60%,#4a1500 100%); }
-    .ga-gta      { background: linear-gradient(135deg,#0a1624 0%,#1a3a5c 40%,#c45c1a 100%); }
-    .ga-silksong { background: linear-gradient(135deg,#0d1829 0%,#1a1045 55%,#0d3333 100%); }
-    .ga-astro    { background: linear-gradient(135deg,#0d1a6e 0%,#2a0d6e 55%,#6e0d5a 100%); }
-    .ga-mhw      { background: linear-gradient(135deg,#0a1a0a 0%,#1a3d1a 50%,#4d2c1a 100%); }
-    .ga-metaphor { background: linear-gradient(135deg,#2d0d00 0%,#6e3500 55%,#3d2200 100%); }
-    .ga-indiana  { background: linear-gradient(135deg,#2d1a00 0%,#6a450d 55%,#1a0d00 100%); }
-    .ga-switch   { background: linear-gradient(135deg,#001a0a 0%,#003d1a 55%,#00290d 100%); }
-    .ga-da       { background: linear-gradient(135deg,#1a001a 0%,#3d003d 55%,#1a0029 100%); }
-
-    /* Glint overlay on game art */
-    .ga::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 80% 80% at 70% 30%, rgba(255,255,255,0.06) 0%, transparent 70%);
-    }
-
-    /* ── HERO ────────────────────────────────── */
-    .hero { padding: 32px 0 0; }
-    .hero-card {
+    /* ── Hero ───────────────────────────────────── */
+    .hero {
       position: relative;
-      height: 540px;
-      border-radius: 4px;
+      height: 100svh;
+      min-height: 620px;
+      display: flex;
+      align-items: flex-end;
       overflow: hidden;
-      cursor: pointer;
     }
-    /* Signature: targeting-bracket corners */
-    .hero-card::before,
-    .hero-card::after {
-      content: '';
+    .hero-parallax-bg {
       position: absolute;
-      width: 26px;
-      height: 26px;
-      z-index: 10;
-      transition: width 0.35s ease, height 0.35s ease;
+      inset: -15% 0 0;
+      z-index: 0;
+      will-change: transform;
     }
-    .hero-card::before {
-      top: 18px; left: 18px;
-      border-top: 2px solid var(--gold);
-      border-left: 2px solid var(--gold);
+    .hero-parallax-bg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
     }
-    .hero-card::after {
-      bottom: 18px; right: 18px;
-      border-bottom: 2px solid var(--gold);
-      border-right: 2px solid var(--gold);
-    }
-    .hero-card:hover::before,
-    .hero-card:hover::after { width: 42px; height: 42px; }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      transition: transform 0.55s ease;
-    }
-    .hero-card:hover .hero-bg { transform: scale(1.04); }
-    .hero-bg::after {
+    /* Gradient fallback + overlay */
+    .hero-parallax-bg::before {
       content: '';
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(ellipse 70% 60% at 75% 50%, rgba(240,165,0,0.13) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 80% at 88% 25%, rgba(180,60,255,0.12) 0%, transparent 60%);
+      background: linear-gradient(135deg, #0a0010 0%, #1a0000 40%, #000814 100%);
+      z-index: 1;
     }
+    .hero-parallax-bg img { mix-blend-mode: luminosity; opacity: .45; }
     .hero-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        to right,
-        rgba(8,10,15,0.94) 0%,
-        rgba(8,10,15,0.72) 42%,
-        rgba(8,10,15,0.08) 100%
-      );
+      z-index: 1;
+      background:
+        linear-gradient(to top, rgba(6,7,9,1) 0%, rgba(6,7,9,0.7) 30%, rgba(6,7,9,0.05) 100%),
+        linear-gradient(to right, rgba(6,7,9,0.8) 0%, transparent 60%);
     }
     .hero-content {
-      position: absolute;
-      bottom: 0; left: 0;
-      width: 54%;
-      padding: 48px;
+      position: relative;
+      z-index: 2;
+      padding: 0 28px 72px;
+      max-width: 1300px;
+      margin: 0 auto;
+      width: 100%;
     }
     .hero-eyebrow {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
-    .hero-date {
-      font-family: var(--fm);
-      font-size: 10px;
-      color: var(--text-3);
-      letter-spacing: 0.05em;
-    }
+    .hero-date { font-family: var(--fm); font-size: 10px; color: var(--t3); letter-spacing: .05em; }
     .hero-title {
       font-family: var(--fd);
-      font-size: 58px;
+      font-size: clamp(52px, 7vw, 96px);
       font-weight: 900;
-      line-height: 0.93;
-      letter-spacing: -0.5px;
       text-transform: uppercase;
-      color: var(--text-1);
-      margin-bottom: 18px;
+      line-height: 0.91;
+      letter-spacing: -1px;
+      margin-bottom: 22px;
+      max-width: 700px;
     }
-    .hero-title em { color: var(--gold); font-style: normal; }
+    .hero-title .accent { color: var(--gold); }
     .hero-desc {
-      font-size: 14px;
-      color: var(--text-2);
-      line-height: 1.65;
-      max-width: 400px;
-      margin-bottom: 28px;
+      font-size: 15px;
+      color: var(--t2);
+      line-height: 1.7;
+      max-width: 440px;
+      margin-bottom: 32px;
     }
-    .hero-foot { display: flex; align-items: center; gap: 18px; }
-    .hero-byline { font-size: 11px; color: var(--text-3); }
-    .hero-byline strong { color: var(--text-2); font-weight: 600; }
-    .btn-read {
-      display: inline-flex;
+    .hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .hero-byline  { font-size: 12px; color: var(--t3); }
+    .hero-byline strong { color: var(--t2); font-weight: 600; }
+
+    /* Corner brackets — signature element */
+    .hero-badge {
+      position: absolute;
+      top: 48px; right: max(28px, calc((100vw - 1300px)/2 + 28px));
+      z-index: 2;
+      background: rgba(6,7,9,0.85);
+      border: 1px solid var(--border-hi);
+      padding: 20px 24px;
+      text-align: center;
+      min-width: 96px;
+      backdrop-filter: blur(8px);
+    }
+    .hero-badge::before, .hero-badge::after {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      transition: width .3s, height .3s;
+    }
+    .hero-badge::before { top: -2px; left: -2px; border-top: 2px solid var(--gold); border-left: 2px solid var(--gold); }
+    .hero-badge::after  { bottom: -2px; right: -2px; border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold); }
+    .hero-badge:hover::before,
+    .hero-badge:hover::after { width: 22px; height: 22px; }
+    .hero-badge-label { font-family: var(--fm); font-size: 8px; letter-spacing: .16em; text-transform: uppercase; color: var(--t3); margin-bottom: 8px; }
+    .hero-badge-score { font-family: var(--fd); font-size: 56px; font-weight: 900; color: var(--gold); line-height: 1; }
+    .hero-badge-denom { font-family: var(--fm); font-size: 9px; color: var(--t3); margin-top: 4px; }
+
+    /* ── Spotlight (scroll-scrub) ──────────────── */
+    .spotlight-container { height: 280vh; position: relative; }
+    .spotlight[data-spotlight] {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.09em;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--bg-0);
+    }
+
+    /* Radial glow behind image */
+    .sp-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse 80% 60% at 50% 50%,
+        rgba(240,165,0, calc(var(--p2,0) * 0.1)) 0%,
+        transparent 70%
+      );
+    }
+
+    /* Ambient particles */
+    .sp-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: calc(var(--p2,0) * 0.4);
+    }
+    .sp-particles span {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: floatDot 4s ease-in-out infinite;
+    }
+    .sp-particles span:nth-child(1)  { left:10%; top:20%; animation-delay:0s; }
+    .sp-particles span:nth-child(2)  { left:85%; top:15%; animation-delay:.7s; }
+    .sp-particles span:nth-child(3)  { left:25%; top:70%; animation-delay:1.2s; }
+    .sp-particles span:nth-child(4)  { left:70%; top:75%; animation-delay:.4s; }
+    .sp-particles span:nth-child(5)  { left:50%; top:10%; animation-delay:2s; }
+    .sp-particles span:nth-child(6)  { left:90%; top:55%; animation-delay:1.6s; }
+    .sp-particles span:nth-child(7)  { left:5%;  top:50%; animation-delay:.9s; }
+    .sp-particles span:nth-child(8)  { left:60%; top:90%; animation-delay:1.8s; }
+    @keyframes floatDot {
+      0%,100% { transform: translateY(0); opacity: 0.6; }
+      50%      { transform: translateY(-18px); opacity: 1; }
+    }
+
+    /* Eyebrow */
+    .sp-eyebrow {
+      font-family: var(--fm);
+      font-size: 10px;
+      letter-spacing: .22em;
       text-transform: uppercase;
       color: var(--gold);
-      text-decoration: none;
-      padding: 10px 20px;
-      border: 1px solid rgba(240,165,0,0.36);
-      border-radius: 2px;
-      transition: background 0.15s, border-color 0.15s;
+      margin-bottom: 14px;
+      position: relative; z-index: 2;
+      opacity: var(--p1,0);
+      transform: translateY(calc((1 - var(--p1,0)) * -18px));
     }
-    .btn-read:hover { background: rgba(240,165,0,0.1); border-color: var(--gold); }
 
-    .hero-score {
-      position: absolute;
-      top: 48px; right: 48px;
-      background: rgba(8,10,15,0.88);
-      border: 1px solid var(--border);
-      padding: 16px 20px;
+    /* Game title */
+    .sp-title-block {
+      position: relative; z-index: 2;
       text-align: center;
-      min-width: 88px;
+      margin-bottom: 22px;
+      opacity: var(--p1,0);
+      transform: translateY(calc((1 - var(--p1,0)) * -12px));
     }
-    .hero-score::before {
-      content: 'SCORE';
-      display: block;
-      font-family: var(--fm);
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      color: var(--text-3);
-      margin-bottom: 6px;
-    }
-    .hero-score-val {
+    .sp-title {
       font-family: var(--fd);
-      font-size: 50px;
+      font-size: clamp(40px,6vw,80px);
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--t1);
+      line-height: .91;
+      letter-spacing: -.5px;
+    }
+    .sp-title em { color: var(--gold); font-style: normal; }
+
+    /* Expanding frame */
+    .sp-frame-outer {
+      position: relative; z-index: 2;
+      width: min(860px, 88vw);
+      aspect-ratio: 16/9;
+    }
+    .sp-frame {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      border-radius: 3px;
+      clip-path: inset(
+        calc((1 - var(--p2,0)) * 49%)
+        calc((1 - var(--p2,0)) * 49%)
+        calc((1 - var(--p2,0)) * 49%)
+        calc((1 - var(--p2,0)) * 49%)
+        round 3px
+      );
+    }
+    .sp-frame img { width:100%; height:100%; object-fit:cover; display:block; }
+    .sp-frame-border {
+      position: absolute; inset: -1px;
+      border: 1px solid rgba(240,165,0, calc(var(--p2,0) * .7));
+      border-radius: 4px;
+      pointer-events: none;
+      transition: none;
+    }
+
+    /* Bottom info */
+    .sp-info {
+      position: relative; z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: var(--p3,0);
+      transform: translateY(calc((1 - var(--p3,0)) * 20px));
+    }
+    .sp-score-block { text-align: center; }
+    .sp-score-label { font-family: var(--fm); font-size: 8px; letter-spacing: .16em; text-transform: uppercase; color: var(--t3); margin-bottom: 4px; }
+    .sp-score-big {
+      font-family: var(--fd);
+      font-size: clamp(48px,5vw,72px);
       font-weight: 900;
       color: var(--gold);
       line-height: 1;
     }
-    .hero-score-of {
-      font-family: var(--fm);
-      font-size: 10px;
-      color: var(--text-3);
-      margin-top: 5px;
+    .sp-divider { width: 1px; height: 52px; background: var(--border-hi); }
+    .sp-detail { }
+    .sp-game-title { font-family: var(--fd); font-size: 22px; font-weight: 800; text-transform: uppercase; color: var(--t1); margin-bottom: 6px; }
+    .sp-plats { display: flex; gap: 6px; margin-bottom: 6px; }
+    .sp-verdict { font-size: 13px; color: var(--t2); max-width: 340px; line-height: 1.55; }
+    .sp-cta {
+      position: relative; z-index: 2;
+      margin-top: 18px;
+      opacity: var(--p4,0);
+      transform: translateY(calc((1 - var(--p4,0)) * 14px));
     }
 
-    /* ── FEATURED ────────────────────────────── */
-    .featured { padding: 36px 0; }
-    .featured-grid {
+    /* ── Featured grid ──────────────────────────── */
+    .featured { padding: 60px 0 0; }
+    .feat-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
       gap: 1px;
@@ -396,61 +261,40 @@
       border: 1px solid var(--border);
       border-radius: 4px;
       overflow: hidden;
-      height: 480px;
+      min-height: 500px;
     }
-    .feat-card {
-      background: var(--bg-1);
-      cursor: pointer;
-      overflow: hidden;
-      transition: background 0.15s;
-      position: relative;
-    }
-    .feat-card:hover { background: var(--bg-2); }
-
-    /* Large card */
     .feat-large {
       display: flex;
       flex-direction: column;
+      background: var(--bg-1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background .15s;
     }
-    .feat-img-wrap {
+    .feat-large:hover { background: var(--bg-2); }
+    .feat-large-img {
       flex: 1;
       position: relative;
       overflow: hidden;
+      min-height: 260px;
     }
-    .feat-img-wrap .ga {
+    .feat-large-img img {
       position: absolute;
       inset: 0;
-      transition: transform 0.45s ease;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform .5s var(--ease-out-quart);
     }
-    .feat-card:hover .feat-img-wrap .ga { transform: scale(1.05); }
-    .feat-img-wrap::after {
+    .feat-large:hover .feat-large-img img { transform: scale(1.05); }
+    .feat-large-img::after {
       content: '';
       position: absolute;
       bottom: 0; left: 0; right: 0;
-      height: 60%;
+      height: 50%;
       background: linear-gradient(to top, var(--bg-1) 0%, transparent 100%);
     }
-
-    .feat-body { padding: 20px 22px 22px; }
-    .feat-large .feat-body { padding: 22px 26px 26px; }
-    .feat-tags { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .feat-title {
-      font-family: var(--fd);
-      font-weight: 800;
-      text-transform: uppercase;
-      color: var(--text-1);
-      line-height: 1.06;
-      margin-bottom: 8px;
-      transition: color 0.15s;
-    }
-    .feat-card:hover .feat-title { color: var(--gold); }
-    .feat-large .feat-title { font-size: 26px; }
-    .feat-title { font-size: 15px; }
-    .feat-desc { font-size: 13px; color: var(--text-2); line-height: 1.55; }
-    .feat-large .feat-desc { font-size: 13px; }
-    .feat-meta { font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-top: 10px; }
-
-    /* Right column: two stacked small cards */
+    .feat-large-body { padding: 24px 28px 28px; }
     .feat-right {
       display: flex;
       flex-direction: column;
@@ -461,71 +305,79 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-    }
-    .feat-sm-img {
-      height: 110px;
-      position: relative;
+      background: var(--bg-1);
+      cursor: pointer;
       overflow: hidden;
-      flex-shrink: 0;
+      transition: background .15s;
     }
-    .feat-sm-img .ga { transition: transform 0.45s ease; }
-    .feat-card:hover .feat-sm-img .ga { transform: scale(1.06); }
+    .feat-sm:hover { background: var(--bg-2); }
+    .feat-sm-img { height: 120px; position: relative; overflow: hidden; flex-shrink: 0; }
+    .feat-sm-img img { width:100%; height:100%; object-fit:cover; transition: transform .5s var(--ease-out-quart); }
+    .feat-sm:hover .feat-sm-img img { transform: scale(1.06); }
+    .feat-sm-body { padding: 16px 18px 18px; flex: 1; }
+    .feat-title {
+      font-family: var(--fd);
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--t1);
+      line-height: 1.05;
+      margin-bottom: 8px;
+      transition: color .15s;
+    }
+    .feat-large:hover .feat-title,
+    .feat-sm:hover .feat-title { color: var(--gold); }
+    .feat-large .feat-title { font-size: 26px; }
+    .feat-sm .feat-title    { font-size: 15px; }
+    .feat-desc { font-size: 13px; color: var(--t2); line-height: 1.55; }
+    .feat-meta { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 10px; }
 
-    /* ── LATEST + SIDEBAR ────────────────────── */
-    .latest { padding: 0 0 48px; }
+    /* ── Latest + sidebar ───────────────────────── */
+    .latest { padding: 60px 0 0; }
     .latest-layout {
       display: grid;
       grid-template-columns: 1fr 340px;
-      gap: 40px;
+      gap: 44px;
     }
 
-    .article-list { display: flex; flex-direction: column; }
-    .article-item {
+    /* Article list */
+    .art-list {}
+    .art-item {
       display: grid;
-      grid-template-columns: 116px 1fr;
+      grid-template-columns: 112px 1fr;
       gap: 16px;
-      padding: 16px 0;
+      padding: 18px 0;
       border-bottom: 1px solid var(--border);
       cursor: pointer;
     }
-    .article-item:last-child { border-bottom: none; }
-    .article-thumb {
-      width: 116px;
-      height: 78px;
-      border-radius: 2px;
+    .art-item:last-child { border-bottom: none; }
+    .art-thumb {
+      width: 112px; height: 75px;
+      border-radius: 3px;
       overflow: hidden;
       flex-shrink: 0;
     }
-    .article-thumb .ga { transition: transform 0.35s ease; }
-    .article-item:hover .article-thumb .ga { transform: scale(1.07); }
-    .article-tags { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; flex-wrap: wrap; }
-    .article-title {
+    .art-thumb img { width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease-out-quart); }
+    .art-item:hover .art-thumb img { transform: scale(1.08); }
+    .art-tags { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; flex-wrap: wrap; }
+    .art-title {
       font-family: var(--fd);
       font-size: 16px;
       font-weight: 800;
       text-transform: uppercase;
-      color: var(--text-1);
+      color: var(--t1);
       line-height: 1.08;
-      margin-bottom: 6px;
-      transition: color 0.15s;
+      margin-bottom: 5px;
+      transition: color .15s;
     }
-    .article-item:hover .article-title { color: var(--gold); }
-    .article-excerpt {
-      font-size: 12px;
-      color: var(--text-2);
-      line-height: 1.55;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .article-meta { font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-top: 8px; }
+    .art-item:hover .art-title { color: var(--gold); }
+    .art-excerpt { font-size: 12px; color: var(--t2); line-height: 1.55; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .art-meta { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 8px; }
 
-    /* ── SIDEBAR ─────────────────────────────── */
-    .sidebar-block { margin-bottom: 32px; }
-
-    .review-list { display: flex; flex-direction: column; }
-    .review-item {
+    /* Sidebar */
+    .sidebar {}
+    .sidebar-block { margin-bottom: 36px; }
+    .rev-list {}
+    .rev-item {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -533,31 +385,27 @@
       border-bottom: 1px solid var(--border);
       cursor: pointer;
     }
-    .review-item:last-child { border-bottom: none; }
-    .review-rank { font-family: var(--fm); font-size: 10px; color: var(--text-3); width: 18px; flex-shrink: 0; }
-    .review-thumb { width: 52px; height: 52px; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
-    .review-info { flex: 1; min-width: 0; }
-    .review-name {
+    .rev-item:last-child { border-bottom: none; }
+    .rev-rank { font-family: var(--fm); font-size: 10px; color: var(--t3); width: 18px; flex-shrink: 0; }
+    .rev-thumb { width: 50px; height: 50px; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+    .rev-thumb img { width:100%;height:100%;object-fit:cover; }
+    .rev-info { flex: 1; min-width: 0; }
+    .rev-name {
       font-family: var(--fd);
       font-size: 13px;
       font-weight: 800;
       text-transform: uppercase;
-      color: var(--text-1);
+      color: var(--t1);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: color 0.15s;
+      transition: color .15s;
     }
-    .review-item:hover .review-name { color: var(--gold); }
-    .review-platform { font-family: var(--fm); font-size: 9px; color: var(--text-3); margin-top: 3px; }
-    .review-score {
-      font-family: var(--fd);
-      font-size: 22px;
-      font-weight: 900;
-      flex-shrink: 0;
-    }
+    .rev-item:hover .rev-name { color: var(--gold); }
+    .rev-plat { font-family: var(--fm); font-size: 9px; color: var(--t3); margin-top: 3px; }
+    .rev-score { font-family: var(--fd); font-size: 22px; font-weight: 900; flex-shrink: 0; }
 
-    .most-read-list { display: flex; flex-direction: column; }
+    .mr-list {}
     .mr-item {
       display: flex;
       align-items: flex-start;
@@ -567,322 +415,377 @@
       cursor: pointer;
     }
     .mr-item:last-child { border-bottom: none; }
-    .mr-num {
+    .mr-n {
       font-family: var(--fd);
-      font-size: 30px;
+      font-size: 28px;
       font-weight: 900;
-      color: var(--border);
+      color: var(--border-hi);
       line-height: 1;
       flex-shrink: 0;
       width: 28px;
+      transition: color .15s;
     }
+    .mr-item:hover .mr-n { color: var(--t4); }
     .mr-title {
       font-family: var(--fd);
       font-size: 13px;
       font-weight: 700;
       text-transform: uppercase;
-      color: var(--text-2);
+      color: var(--t2);
       line-height: 1.25;
       padding-top: 4px;
-      transition: color 0.15s;
+      transition: color .15s;
     }
-    .mr-item:hover .mr-title { color: var(--text-1); }
+    .mr-item:hover .mr-title { color: var(--t1); }
 
-    /* ── FOOTER ──────────────────────────────── */
-    .footer {
-      background: var(--bg-1);
-      border-top: 1px solid var(--border);
-      padding: 44px 0 28px;
+    /* ── Newsletter CTA ─────────────────────────── */
+    .newsletter-cta {
+      margin-top: 60px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-    .footer-top {
-      display: grid;
-      grid-template-columns: 210px 1fr;
-      gap: 64px;
-      margin-bottom: 44px;
+    .newsletter-cta::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 200px;
+      background: radial-gradient(ellipse, rgba(240,165,0,.08) 0%, transparent 70%);
+      pointer-events: none;
     }
-    .footer-logo {
-      font-family: var(--fd);
-      font-weight: 900;
-      font-size: 30px;
-      color: var(--text-1);
-      margin-bottom: 12px;
-    }
-    .footer-logo span { color: var(--gold); }
-    .footer-tagline { font-size: 12px; color: var(--text-3); line-height: 1.65; max-width: 168px; }
-    .footer-links { display: grid; grid-template-columns: repeat(4,1fr); gap: 28px; }
-    .footer-col-head {
-      font-family: var(--fm);
-      font-size: 9px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-bottom: 14px;
-    }
-    .footer-col a {
-      display: block;
+    .nl-title { font-family: var(--fd); font-size: 36px; font-weight: 900; text-transform: uppercase; color: var(--t1); margin-bottom: 8px; }
+    .nl-sub { font-size: 14px; color: var(--t2); margin-bottom: 24px; }
+    .nl-form { display: flex; gap: 8px; max-width: 420px; margin: 0 auto; }
+    .nl-input {
+      flex: 1;
+      background: var(--bg-4);
+      border: 1px solid var(--border-hi);
+      border-radius: 2px;
+      padding: 11px 16px;
+      font-family: var(--fb);
       font-size: 13px;
-      color: var(--text-2);
-      text-decoration: none;
-      margin-bottom: 9px;
-      transition: color 0.15s;
+      color: var(--t1);
+      outline: none;
+      transition: border-color .15s;
     }
-    .footer-col a:hover { color: var(--text-1); }
-    .footer-bottom {
-      border-top: 1px solid var(--border);
-      padding-top: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .footer-copy { font-family: var(--fm); font-size: 11px; color: var(--text-3); }
-    .footer-copy span { color: var(--gold); }
+    .nl-input::placeholder { color: var(--t3); }
+    .nl-input:focus { border-color: var(--gold); }
 
-    /* ── RESPONSIVE ──────────────────────────── */
+    /* ── Responsive ─────────────────────────────── */
     @media (max-width: 1024px) {
       .latest-layout { grid-template-columns: 1fr; }
       .sidebar { display: none; }
     }
-    @media (max-width: 860px) {
-      .featured-grid { grid-template-columns: 1fr; height: auto; }
+    @media (max-width: 768px) {
+      .feat-grid { grid-template-columns: 1fr; min-height: auto; }
       .feat-right { flex-direction: row; }
-      .feat-sm { flex: 1; }
-      .hero-title { font-size: 44px; }
-      .hero-card { height: 460px; }
-      .hero-content { width: 70%; padding: 36px; }
+      .feat-sm { min-width: 0; }
+      .hero-badge { display: none; }
     }
-    @media (max-width: 600px) {
-      nav { display: none; }
-      .hero-title { font-size: 34px; }
-      .hero-card { height: 380px; }
-      .hero-content { width: 100%; padding: 28px; }
-      .hero-score { top: 24px; right: 24px; }
+    @media (max-width: 520px) {
       .feat-right { flex-direction: column; }
-      .footer-top { grid-template-columns: 1fr; gap: 28px; }
-      .footer-links { grid-template-columns: repeat(2,1fr); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .ticker-track { animation: none; }
-      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+      .sp-divider { display: none; }
+      .sp-verdict { display: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══ HEADER ══════════════════════════════════ -->
-<header class="header">
-  <div class="header-inner">
-    <a href="#" class="logo">NEXUS<span>.GG</span></a>
-    <nav>
-      <a href="#" class="active">News</a>
-      <a href="#">Reviews</a>
-      <a href="#">Previews</a>
-      <a href="#">Videos</a>
-      <a href="#">Deals</a>
-      <a href="#">Guides</a>
-      <a href="#">Community</a>
-    </nav>
-    <div class="header-actions">
-      <button class="btn-icon" aria-label="Search">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      </button>
-      <button class="btn-signin">Sign In</button>
+<!-- ══ HEADER ══════════════════════════════════════ -->
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></a>
+      <nav class="site-nav">
+        <a href="news.html">News</a>
+        <a href="reviews.html">Reviews</a>
+        <a href="previews.html">Previews</a>
+        <a href="videos.html">Videos</a>
+        <a href="deals.html">Deals</a>
+        <a href="guides.html">Guides</a>
+      </nav>
+      <div class="header-right">
+        <button class="btn-icon" aria-label="Search">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m19 19-3.8-3.8"/></svg>
+        </button>
+        <button class="btn-signin">Sign In</button>
+        <button class="btn-menu" id="menuBtn" aria-label="Menu" aria-expanded="false">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h14M3 12h14M3 18h14"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 </header>
 
-<!-- ══ BREAKING TICKER ══════════════════════════ -->
-<div class="ticker" role="marquee" aria-label="Breaking news">
+<!-- ══ MOBILE NAV ══════════════════════════════════ -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="news.html">News</a>
+  <a href="reviews.html">Reviews</a>
+  <a href="previews.html">Previews</a>
+  <a href="videos.html">Videos</a>
+  <a href="deals.html">Deals</a>
+  <a href="guides.html">Guides</a>
+</nav>
+
+<!-- ══ TICKER ══════════════════════════════════════ -->
+<div class="ticker" aria-label="Breaking news">
   <div class="ticker-label">Breaking</div>
   <div class="ticker-scroll">
     <div class="ticker-track">
-      <span class="ticker-item">GTA VI confirmed for Fall 2025 — Rockstar breaks silence with pricing details</span>
-      <span class="ticker-item">Hollow Knight: Silksong release date revealed after six years</span>
-      <span class="ticker-item">FromSoftware teases new IP codenamed "Project NIGHTREIGN" for 2026</span>
-      <span class="ticker-item">Monster Hunter Wilds surpasses 8M pre-orders ahead of February launch</span>
-      <span class="ticker-item">Xbox Game Pass adds 15 titles this month including Day 1 exclusives</span>
-      <span class="ticker-item">PlayStation 6 dev kits reportedly shipping to major studios worldwide</span>
-      <span class="ticker-item">GTA VI confirmed for Fall 2025 — Rockstar breaks silence with pricing details</span>
-      <span class="ticker-item">Hollow Knight: Silksong release date revealed after six years</span>
-      <span class="ticker-item">FromSoftware teases new IP codenamed "Project NIGHTREIGN" for 2026</span>
-      <span class="ticker-item">Monster Hunter Wilds surpasses 8M pre-orders ahead of February launch</span>
-      <span class="ticker-item">Xbox Game Pass adds 15 titles this month including Day 1 exclusives</span>
-      <span class="ticker-item">PlayStation 6 dev kits reportedly shipping to major studios worldwide</span>
+      <span class="ticker-item">GTA VI release window confirmed — Rockstar targets Fall 2025 with full gameplay showcase</span>
+      <span class="ticker-item">Clair Obscur: Expedition 33 wins 14 Game of the Year nominations across major outlets</span>
+      <span class="ticker-item">Nintendo Switch 2 sells 4 million units in opening weekend — fastest hardware launch ever</span>
+      <span class="ticker-item">FromSoftware announces new title "Nightreign" — co-op extraction RPG set in Elden Ring world</span>
+      <span class="ticker-item">Monster Hunter Wilds Title Update 2 drops this month with two new apex monsters</span>
+      <span class="ticker-item">PlayStation 6 dev kits confirmed — launch window targeting Holiday 2026</span>
+      <span class="ticker-item">GTA VI release window confirmed — Rockstar targets Fall 2025 with full gameplay showcase</span>
+      <span class="ticker-item">Clair Obscur: Expedition 33 wins 14 Game of the Year nominations across major outlets</span>
+      <span class="ticker-item">Nintendo Switch 2 sells 4 million units in opening weekend — fastest hardware launch ever</span>
+      <span class="ticker-item">FromSoftware announces new title "Nightreign" — co-op extraction RPG set in Elden Ring world</span>
+      <span class="ticker-item">Monster Hunter Wilds Title Update 2 drops this month with two new apex monsters</span>
+      <span class="ticker-item">PlayStation 6 dev kits confirmed — launch window targeting Holiday 2026</span>
     </div>
   </div>
 </div>
 
-<!-- ══ HERO ═════════════════════════════════════ -->
-<section class="hero">
-  <div class="container">
-    <div class="hero-card">
-      <div class="hero-bg ga ga-elden"></div>
-      <div class="hero-overlay"></div>
+<!-- ══ HERO ════════════════════════════════════════ -->
+<section class="hero page-top">
+  <div class="hero-parallax-bg">
+    <img src="https://cdn.akamai.steamstatic.com/steam/apps/2835570/header.jpg" alt="Doom: The Dark Ages" loading="eager">
+  </div>
+  <div class="hero-overlay"></div>
 
-      <div class="hero-content">
-        <div class="hero-eyebrow">
-          <span class="tag tag-review">Review</span>
-          <span class="tag tag-excl">Editor's Pick</span>
-          <span class="hero-date">June 21, 2025</span>
-        </div>
-        <h1 class="hero-title">Elden Ring:<br><em>Shadow of</em><br>the Erdtree</h1>
-        <p class="hero-desc">
-          FromSoftware's expansion redefines what DLC can be — a sprawling 40-hour masterpiece that matches the base game in ambition, beauty, and brutality.
-        </p>
-        <div class="hero-foot">
-          <div class="hero-byline">By <strong>Marcus Webb</strong> &nbsp;·&nbsp; Senior Editor</div>
-          <a href="#" class="btn-read">
-            Read Review
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="hero-score">
-        <div class="hero-score-val">9.5</div>
-        <div class="hero-score-of">out of 10</div>
-      </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="tag t-review">Review</span>
+      <span class="tag t-excl">Cover Story</span>
+      <span class="hero-date">June 21, 2025</span>
     </div>
+
+    <h1 class="hero-title">
+      <span class="reveal-word"><span>Doom:</span></span>
+      <span class="reveal-word"><span>The</span></span>
+      <span class="reveal-word"><span>Dark</span></span>
+      <br>
+      <span class="reveal-word"><span class="accent">Ages</span></span>
+      <span class="reveal-word"><span>Review</span></span>
+    </h1>
+
+    <p class="hero-desc">
+      id Software reinvents the wheel for a third time. Medieval-era DOOM is not a gimmick — it's a revelation. The combat is slower, more tactical, and somehow more brutal than ever.
+    </p>
+    <div class="hero-actions">
+      <div class="hero-byline">By <strong>Marcus Webb</strong> &nbsp;·&nbsp; Senior Editor</div>
+      <a href="reviews.html" class="btn-outline">
+        Read Review
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 11h6M11 6l-5-5-5 5"/><path d="M11 11V6"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Score badge with bracket corners -->
+  <div class="hero-badge">
+    <div class="hero-badge-label">Score</div>
+    <div class="hero-badge-score" data-score="9.4">9.4</div>
+    <div class="hero-badge-denom">/ 10</div>
   </div>
 </section>
 
-<!-- ══ FEATURED ══════════════════════════════════ -->
+<!-- ══ SCROLL SPOTLIGHT ═════════════════════════════ -->
+<div class="spotlight-container">
+  <section class="spotlight" data-spotlight>
+    <div class="sp-glow"></div>
+    <div class="sp-particles">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="sp-eyebrow">— Game Spotlight —</div>
+
+    <div class="sp-title-block">
+      <div class="sp-title">Clair Obscur:<br><em>Expedition 33</em></div>
+    </div>
+
+    <div class="sp-frame-outer">
+      <div class="sp-frame">
+        <img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="Clair Obscur: Expedition 33" loading="lazy">
+      </div>
+      <div class="sp-frame-border"></div>
+    </div>
+
+    <div class="sp-info">
+      <div class="sp-score-block">
+        <div class="sp-score-label">Loadout Score</div>
+        <div class="sp-score-big sc-green" data-score="9.6">9.6</div>
+      </div>
+      <div class="sp-divider"></div>
+      <div class="sp-detail">
+        <div class="sp-game-title">Expedition 33</div>
+        <div class="sp-plats">
+          <span class="plat">PS5</span>
+          <span class="plat">Xbox Series</span>
+          <span class="plat">PC</span>
+        </div>
+        <p class="sp-verdict">A masterpiece of modern RPG design — emotionally devastating, mechanically brilliant, and utterly unlike anything else in years.</p>
+      </div>
+    </div>
+
+    <div class="sp-cta">
+      <a href="reviews.html" class="btn-outline">Full Review →</a>
+    </div>
+  </section>
+</div>
+
+<!-- ══ FEATURED ══════════════════════════════════════ -->
 <section class="featured">
   <div class="container">
-    <div class="section-head">
-      <h2 class="section-title">Featured</h2>
-      <a href="#" class="section-more">View All →</a>
+    <div class="sec-head">
+      <h2 class="sec-title">Featured</h2>
+      <a href="news.html" class="sec-more">View All →</a>
     </div>
-    <div class="featured-grid">
 
-      <!-- Large -->
-      <div class="feat-card feat-large">
-        <div class="feat-img-wrap">
-          <div class="ga ga-wukong"></div>
+    <div class="feat-grid fade-up">
+      <!-- Large card -->
+      <div class="feat-large">
+        <div class="feat-large-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="Monster Hunter Wilds" loading="lazy">
         </div>
-        <div class="feat-body">
-          <div class="feat-tags">
-            <span class="tag tag-review">Review</span>
-            <span class="platform">PC · PS5</span>
-            <span class="score-inline"><span class="score-n sc-good">9.0</span><span class="score-d">/10</span></span>
+        <div class="feat-large-body">
+          <div class="card-tags">
+            <span class="tag t-review">Review</span>
+            <span class="plat">PS5 · Xbox · PC</span>
+            <span class="score"><span class="score-n sm sc-gold" data-score="9.2">9.2</span><span class="score-denom">/10</span></span>
           </div>
-          <h3 class="feat-title">Black Myth: Wukong — A Legend Brought to Breathtaking Life</h3>
-          <p class="feat-desc">Game Science's debut flagship is a stunning achievement — visually unrivaled, mythologically rich, and a technical showcase that no other game has matched.</p>
-          <div class="feat-meta">Lin Chen &nbsp;·&nbsp; Aug 20, 2024</div>
+          <h3 class="feat-title">Monster Hunter Wilds — The Definitive Hunt Begins</h3>
+          <p class="feat-desc">Capcom's most ambitious entry doesn't just raise the bar — it buries the old one. A living ecosystem, seamless transitions, and the series' finest monster roster make this an unmissable 2025 landmark.</p>
+          <div class="feat-meta">Jin Park &nbsp;·&nbsp; Feb 28, 2025</div>
         </div>
       </div>
 
       <!-- Right column -->
       <div class="feat-right">
-        <div class="feat-card feat-sm">
+        <div class="feat-sm">
           <div class="feat-sm-img">
-            <div class="ga ga-gta"></div>
+            <img src="https://cdn.akamai.steamstatic.com/steam/apps/2683250/header.jpg" alt="Metaphor: ReFantazio" loading="lazy">
           </div>
-          <div class="feat-body">
-            <div class="feat-tags"><span class="tag tag-hot">Hot</span><span class="tag tag-news">News</span></div>
-            <h3 class="feat-title">GTA VI Confirmed for Fall 2025 — Everything We Know</h3>
-            <p class="feat-desc">Rockstar ends the silence with a release window, gameplay details, and a price point already sparking debate.</p>
-            <div class="feat-meta">Sam Torres &nbsp;·&nbsp; Jun 18, 2025</div>
+          <div class="feat-sm-body">
+            <div class="card-tags">
+              <span class="tag t-review">Review</span>
+              <span class="score"><span class="score-n sm sc-gold" data-score="9.3">9.3</span><span class="score-denom">/10</span></span>
+            </div>
+            <h3 class="feat-title">Metaphor: ReFantazio Is Atlus at Its Peak</h3>
+            <p class="feat-desc">Bold, politically sharp, and mechanically sublime — the studio's finest work.</p>
+            <div class="feat-meta">Priya Nair &nbsp;·&nbsp; Oct 11, 2024</div>
           </div>
         </div>
-        <div class="feat-card feat-sm">
+        <div class="feat-sm">
           <div class="feat-sm-img">
-            <div class="ga ga-silksong"></div>
+            <img src="https://cdn.akamai.steamstatic.com/steam/apps/2778580/header.jpg" alt="Elden Ring: Shadow of the Erdtree" loading="lazy">
           </div>
-          <div class="feat-body">
-            <div class="feat-tags"><span class="tag tag-preview">Preview</span></div>
-            <h3 class="feat-title">Hollow Knight: Silksong — We Played It. Finally.</h3>
-            <p class="feat-desc">After six years of anticipation, Team Cherry's sequel plays unlike anything we expected — and that's exactly the point.</p>
-            <div class="feat-meta">Priya Nair &nbsp;·&nbsp; Jun 14, 2025</div>
+          <div class="feat-sm-body">
+            <div class="card-tags">
+              <span class="tag t-excl">Editor's Pick</span>
+            </div>
+            <h3 class="feat-title">Elden Ring DLC: The Best Expansion Ever Made</h3>
+            <p class="feat-desc">Shadow of the Erdtree doesn't expand the game — it completes it. Forty hours of FromSoftware at its absolute apex.</p>
+            <div class="feat-meta">Marcus Webb &nbsp;·&nbsp; Jun 21, 2024</div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- ══ LATEST + SIDEBAR ═══════════════════════════ -->
+<!-- ══ LATEST + SIDEBAR ══════════════════════════════ -->
 <section class="latest">
   <div class="container">
     <div class="latest-layout">
 
-      <!-- Feed -->
+      <!-- Article feed -->
       <div>
-        <div class="section-head">
-          <h2 class="section-title">Latest News</h2>
-          <a href="#" class="section-more">All News →</a>
+        <div class="sec-head">
+          <h2 class="sec-title">Latest</h2>
+          <a href="news.html" class="sec-more">All News →</a>
         </div>
-        <div class="article-list">
+        <div class="art-list stagger">
 
-          <article class="article-item">
-            <div class="article-thumb"><div class="ga ga-astro"></div></div>
+          <article class="art-item fade-up">
+            <div class="art-thumb">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/2358720/header.jpg" alt="Black Myth: Wukong" loading="lazy">
+            </div>
             <div>
-              <div class="article-tags">
-                <span class="tag tag-review">Review</span>
-                <span class="platform">PS5</span>
-                <span class="score-inline"><span class="score-n sc-great">9.8</span><span class="score-d">/10</span></span>
+              <div class="art-tags">
+                <span class="tag t-review">Review</span>
+                <span class="plat">PS5 · PC</span>
+                <span class="score"><span class="score-n sm sc-gold" data-score="9.0">9.0</span><span class="score-denom">/10</span></span>
               </div>
-              <h3 class="article-title">Astro Bot Is the Best PlayStation Game in Years</h3>
-              <p class="article-excerpt">Team Asobi's platformer is pure delight — technically virtuosic, joyfully nostalgic, and the most fun you'll have with a DualSense in its lifetime.</p>
-              <div class="article-meta">Marcus Webb &nbsp;·&nbsp; Sep 4, 2024</div>
+              <h3 class="art-title">Black Myth: Wukong — A Legend Brought to Life</h3>
+              <p class="art-excerpt">Game Science's debut is a visual triumph with unexpected mechanical depth — Journey to the West's most extraordinary adaptation.</p>
+              <div class="art-meta">Lin Chen &nbsp;·&nbsp; Aug 20, 2024</div>
             </div>
           </article>
 
-          <article class="article-item">
-            <div class="article-thumb"><div class="ga ga-mhw"></div></div>
-            <div>
-              <div class="article-tags"><span class="tag tag-news">News</span></div>
-              <h3 class="article-title">Monster Hunter Wilds Breaks Pre-Order Records Ahead of Feb Launch</h3>
-              <p class="article-excerpt">Capcom confirms over 8 million pre-orders as the series' largest, most seamlessly connected world prepares to go live next month.</p>
-              <div class="article-meta">Jin Park &nbsp;·&nbsp; Jan 10, 2025</div>
+          <article class="art-item fade-up">
+            <div class="art-thumb">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/2677660/header.jpg" alt="Indiana Jones" loading="lazy">
             </div>
-          </article>
-
-          <article class="article-item">
-            <div class="article-thumb"><div class="ga ga-metaphor"></div></div>
             <div>
-              <div class="article-tags">
-                <span class="tag tag-review">Review</span>
-                <span class="platform">PC · Xbox · PS5</span>
-                <span class="score-inline"><span class="score-n sc-good">9.3</span><span class="score-d">/10</span></span>
+              <div class="art-tags">
+                <span class="tag t-review">Review</span>
+                <span class="plat">Xbox · PC</span>
+                <span class="score"><span class="score-n sm sc-ok" data-score="8.7">8.7</span><span class="score-denom">/10</span></span>
               </div>
-              <h3 class="article-title">Metaphor: ReFantazio Is Atlus at Its Most Ambitious</h3>
-              <p class="article-excerpt">A bold fantasy setting, tightly woven political drama, and the studio's sharpest combat yet make this an unmissable 90-hour odyssey.</p>
-              <div class="article-meta">Priya Nair &nbsp;·&nbsp; Oct 11, 2024</div>
+              <h3 class="art-title">Indiana Jones and the Great Circle Review</h3>
+              <p class="art-excerpt">MachineGames delivers the most authentic Indy experience in decades — rollicking, cinematic, and genuinely funny.</p>
+              <div class="art-meta">Sam Torres &nbsp;·&nbsp; Dec 9, 2024</div>
             </div>
           </article>
 
-          <article class="article-item">
-            <div class="article-thumb"><div class="ga ga-indiana"></div></div>
+          <article class="art-item fade-up">
+            <div class="art-thumb">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/2183900/header.jpg" alt="Space Marine 2" loading="lazy">
+            </div>
             <div>
-              <div class="article-tags">
-                <span class="tag tag-review">Review</span>
-                <span class="platform">Xbox · PC</span>
-                <span class="score-inline"><span class="score-n sc-ok">8.7</span><span class="score-d">/10</span></span>
+              <div class="art-tags">
+                <span class="tag t-news">News</span>
               </div>
-              <h3 class="article-title">Indiana Jones and the Great Circle Review</h3>
-              <p class="article-excerpt">MachineGames delivers the most authentic Indy experience in decades — a rollicking adventure that's as smart as it is cinematic.</p>
-              <div class="article-meta">Sam Torres &nbsp;·&nbsp; Dec 9, 2024</div>
+              <h3 class="art-title">Space Marine 2 Season 5 — Everything Announced</h3>
+              <p class="art-excerpt">Saber Interactive drops the biggest content update yet: a new campaign chapter, two Operations, and a long-requested Chaos Space Marine faction.</p>
+              <div class="art-meta">Aiko Tanaka &nbsp;·&nbsp; Jun 12, 2025</div>
             </div>
           </article>
 
-          <article class="article-item">
-            <div class="article-thumb"><div class="ga ga-switch"></div></div>
+          <article class="art-item fade-up">
+            <div class="art-thumb">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/1145350/header.jpg" alt="Hades 2" loading="lazy">
+            </div>
             <div>
-              <div class="article-tags"><span class="tag tag-news">News</span></div>
-              <h3 class="article-title">Nintendo Switch 2 Launch Lineup Includes Surprise First-Party Title</h3>
-              <p class="article-excerpt">Nintendo's follow-up hardware launches with a stronger lineup than anticipated — here's every confirmed game and what the upgrade actually means.</p>
-              <div class="article-meta">Aiko Tanaka &nbsp;·&nbsp; Mar 5, 2025</div>
+              <div class="art-tags">
+                <span class="tag t-review">Review</span>
+                <span class="plat">PC</span>
+                <span class="score"><span class="score-n sm sc-gold" data-score="9.1">9.1</span><span class="score-denom">/10</span></span>
+              </div>
+              <h3 class="art-title">Hades 2 Early Access — Supergiant Does It Again</h3>
+              <p class="art-excerpt">Melinoë is an immediately compelling heir to Zagreus. The Arcana system adds strategic depth the original lacked, and the writing is as sharp as ever.</p>
+              <div class="art-meta">Priya Nair &nbsp;·&nbsp; May 6, 2024</div>
             </div>
           </article>
 
-          <article class="article-item">
-            <div class="article-thumb"><div class="ga ga-da"></div></div>
+          <article class="art-item fade-up">
+            <div class="art-thumb">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/1845910/header.jpg" alt="Dragon Age: The Veilguard" loading="lazy">
+            </div>
             <div>
-              <div class="article-tags"><span class="tag tag-preview">Preview</span></div>
-              <h3 class="article-title">We Spent Four Hours in Dragon Age: The Veilguard</h3>
-              <p class="article-excerpt">BioWare's long-awaited sequel is a tonal pivot that pays off — a tighter, more confident RPG that recaptures the spirit of Origins in unexpected ways.</p>
-              <div class="article-meta">Lin Chen &nbsp;·&nbsp; Sep 30, 2024</div>
+              <div class="art-tags">
+                <span class="tag t-preview">Preview</span>
+              </div>
+              <h3 class="art-title">Dragon Age: The Veilguard — Six Hours With BioWare's Return</h3>
+              <p class="art-excerpt">The companion writing is the best since Inquisition. Whether the tonal shift from Origins will satisfy the faithful is another question entirely.</p>
+              <div class="art-meta">Lin Chen &nbsp;·&nbsp; Sep 30, 2024</div>
             </div>
           </article>
 
@@ -892,82 +795,67 @@
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-block">
-          <div class="section-head">
-            <h2 class="section-title">Top Reviews</h2>
+          <div class="sec-head">
+            <h2 class="sec-title">Top Reviews</h2>
           </div>
-          <div class="review-list">
-            <div class="review-item">
-              <span class="review-rank">01</span>
-              <div class="review-thumb"><div class="ga ga-astro"></div></div>
-              <div class="review-info">
-                <div class="review-name">Astro Bot</div>
-                <div class="review-platform">PS5</div>
-              </div>
-              <div class="review-score sc-great">9.8</div>
+          <div class="rev-list">
+            <div class="rev-item">
+              <span class="rev-rank">01</span>
+              <div class="rev-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="" loading="lazy"></div>
+              <div class="rev-info"><div class="rev-name">Clair Obscur</div><div class="rev-plat">PS5 · Xbox · PC</div></div>
+              <div class="rev-score sc-green">9.6</div>
             </div>
-            <div class="review-item">
-              <span class="review-rank">02</span>
-              <div class="review-thumb"><div class="ga ga-elden"></div></div>
-              <div class="review-info">
-                <div class="review-name">Elden Ring DLC</div>
-                <div class="review-platform">PC · PS5 · Xbox</div>
-              </div>
-              <div class="review-score sc-great">9.5</div>
+            <div class="rev-item">
+              <span class="rev-rank">02</span>
+              <div class="rev-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2835570/header.jpg" alt="" loading="lazy"></div>
+              <div class="rev-info"><div class="rev-name">Doom: Dark Ages</div><div class="rev-plat">PS5 · Xbox · PC</div></div>
+              <div class="rev-score sc-green">9.4</div>
             </div>
-            <div class="review-item">
-              <span class="review-rank">03</span>
-              <div class="review-thumb"><div class="ga ga-metaphor"></div></div>
-              <div class="review-info">
-                <div class="review-name">Metaphor: ReFantazio</div>
-                <div class="review-platform">PC · Xbox · PS5</div>
-              </div>
-              <div class="review-score sc-good">9.3</div>
+            <div class="rev-item">
+              <span class="rev-rank">03</span>
+              <div class="rev-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2778580/header.jpg" alt="" loading="lazy"></div>
+              <div class="rev-info"><div class="rev-name">Elden Ring DLC</div><div class="rev-plat">PC · PS5 · Xbox</div></div>
+              <div class="rev-score sc-green">9.5</div>
             </div>
-            <div class="review-item">
-              <span class="review-rank">04</span>
-              <div class="review-thumb"><div class="ga ga-wukong"></div></div>
-              <div class="review-info">
-                <div class="review-name">Black Myth: Wukong</div>
-                <div class="review-platform">PC · PS5</div>
-              </div>
-              <div class="review-score sc-good">9.0</div>
+            <div class="rev-item">
+              <span class="rev-rank">04</span>
+              <div class="rev-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2683250/header.jpg" alt="" loading="lazy"></div>
+              <div class="rev-info"><div class="rev-name">Metaphor ReFantazio</div><div class="rev-plat">PC · PS5 · Xbox</div></div>
+              <div class="rev-score sc-gold">9.3</div>
             </div>
-            <div class="review-item">
-              <span class="review-rank">05</span>
-              <div class="review-thumb"><div class="ga ga-indiana"></div></div>
-              <div class="review-info">
-                <div class="review-name">Indiana Jones GC</div>
-                <div class="review-platform">Xbox · PC</div>
-              </div>
-              <div class="review-score sc-ok">8.7</div>
+            <div class="rev-item">
+              <span class="rev-rank">05</span>
+              <div class="rev-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="" loading="lazy"></div>
+              <div class="rev-info"><div class="rev-name">Monster Hunter Wilds</div><div class="rev-plat">PS5 · Xbox · PC</div></div>
+              <div class="rev-score sc-gold">9.2</div>
             </div>
           </div>
         </div>
 
         <div class="sidebar-block">
-          <div class="section-head">
-            <h2 class="section-title">Most Read</h2>
+          <div class="sec-head">
+            <h2 class="sec-title">Most Read</h2>
           </div>
-          <div class="most-read-list">
+          <div class="mr-list">
             <div class="mr-item">
-              <div class="mr-num">1</div>
-              <div class="mr-title">GTA VI Officially Confirmed for Fall 2025 — Everything We Know</div>
+              <div class="mr-n">1</div>
+              <div class="mr-title">GTA VI: Release Date, Gameplay, and Everything We Know</div>
             </div>
             <div class="mr-item">
-              <div class="mr-num">2</div>
-              <div class="mr-title">Hollow Knight: Silksong Preview — Worth the Six-Year Wait</div>
+              <div class="mr-n">2</div>
+              <div class="mr-title">Nintendo Switch 2 — Full Hardware Breakdown and Launch Games</div>
             </div>
             <div class="mr-item">
-              <div class="mr-num">3</div>
-              <div class="mr-title">PlayStation 6 Dev Kits Are Real — Here's What Studios Say</div>
+              <div class="mr-n">3</div>
+              <div class="mr-title">FromSoftware Nightreign: Elden Ring Co-op Spin-off Confirmed</div>
             </div>
             <div class="mr-item">
-              <div class="mr-num">4</div>
-              <div class="mr-title">Nintendo Switch 2: Full Specs, Price, and Launch Date</div>
+              <div class="mr-n">4</div>
+              <div class="mr-title">Every Game Confirmed for Xbox Games Showcase 2025</div>
             </div>
             <div class="mr-item">
-              <div class="mr-num">5</div>
-              <div class="mr-title">Every Game Announced at Xbox Games Showcase 2025</div>
+              <div class="mr-n">5</div>
+              <div class="mr-title">PlayStation 6 Specs Leak — What to Expect From Sony's Next Box</div>
             </div>
           </div>
         </div>
@@ -977,22 +865,34 @@
   </div>
 </section>
 
-<!-- ══ FOOTER ════════════════════════════════════ -->
-<footer class="footer">
+<!-- ══ NEWSLETTER ═════════════════════════════════════ -->
+<div class="container">
+  <div class="newsletter-cta fade-up">
+    <div class="nl-title">Stay in the Game</div>
+    <p class="nl-sub">Breaking news, exclusive reviews, and weekly deals — delivered to your inbox.</p>
+    <div class="nl-form">
+      <input type="email" class="nl-input" placeholder="your@email.com" aria-label="Email address">
+      <button class="btn-solid">Subscribe</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ═════════════════════════════════════════ -->
+<footer class="site-footer">
   <div class="container">
     <div class="footer-top">
       <div>
-        <div class="footer-logo">NEXUS<span>.GG</span></div>
-        <p class="footer-tagline">The pulse of gaming. News, reviews, and culture — unfiltered.</p>
+        <div class="footer-logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></div>
+        <p class="footer-tagline">The pulse of gaming — news, reviews, and culture, unfiltered.</p>
       </div>
-      <div class="footer-links">
+      <div class="footer-cols">
         <div class="footer-col">
           <div class="footer-col-head">Coverage</div>
-          <a href="#">News</a>
-          <a href="#">Reviews</a>
-          <a href="#">Previews</a>
-          <a href="#">Features</a>
-          <a href="#">Videos</a>
+          <a href="news.html">News</a>
+          <a href="reviews.html">Reviews</a>
+          <a href="previews.html">Previews</a>
+          <a href="videos.html">Videos</a>
+          <a href="guides.html">Guides</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-head">Platforms</div>
@@ -1004,7 +904,7 @@
         </div>
         <div class="footer-col">
           <div class="footer-col-head">Company</div>
-          <a href="#">About</a>
+          <a href="#">About Us</a>
           <a href="#">Editorial Policy</a>
           <a href="#">Advertise</a>
           <a href="#">Careers</a>
@@ -1019,11 +919,12 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 <span>NEXUS.GG</span>. All rights reserved.</div>
+      <div class="footer-copy">© 2025 <span class="accent">LOADOUT.GG</span>. All rights reserved.</div>
       <div class="footer-copy">Privacy Policy &nbsp;·&nbsp; Terms of Use &nbsp;·&nbsp; Cookie Settings</div>
     </div>
   </div>
 </footer>
 
+<script src="script.js"></script>
 </body>
 </html>

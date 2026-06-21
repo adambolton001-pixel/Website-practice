@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deals — LOADOUT.GG</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-hero { background: var(--bg-1); border-bottom: 1px solid var(--border); padding: 48px 0 36px; }
+    .page-hero-title { font-family: var(--fd); font-size: clamp(42px,6vw,72px); font-weight: 900; text-transform: uppercase; color: var(--t1); letter-spacing: -1px; }
+    .page-hero-sub { font-size: 14px; color: var(--t2); margin-top: 8px; }
+
+    .deals-layout { display: grid; grid-template-columns: 1fr 300px; gap: 40px; align-items: start; padding: 48px 0 80px; }
+    @media (max-width: 960px) { .deals-layout { grid-template-columns: 1fr; } }
+
+    /* Deal cards */
+    .deal-card {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color .2s, transform .25s var(--ease-out-quart), box-shadow .25s;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .deal-card:hover { border-color: var(--border-hi); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,.6); }
+    .deal-img { aspect-ratio: 16/9; overflow: hidden; }
+    .deal-img img { width:100%; height:100%; object-fit:cover; transition: transform .5s var(--ease-out-quart); }
+    .deal-card:hover .deal-img img { transform: scale(1.07); }
+    .deal-body { padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+    .deal-top {}
+    .deal-tags { display:flex; gap:6px; margin-bottom:8px; }
+    .deal-title { font-family: var(--fd); font-size: 17px; font-weight: 800; text-transform: uppercase; color: var(--t1); line-height: 1.1; transition: color .15s; }
+    .deal-card:hover .deal-title { color: var(--gold); }
+    .deal-platform { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+    .deal-prices { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+    .price-now { font-family: var(--fd); font-size: 22px; font-weight: 900; color: var(--green); }
+    .price-was { font-family: var(--fm); font-size: 13px; color: var(--t4); text-decoration: line-through; }
+    .price-off {
+      font-family: var(--fm); font-size: 11px; font-weight: 700;
+      background: var(--green); color: #060709;
+      padding: 3px 7px; border-radius: 2px;
+    }
+    .deal-store { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 6px; }
+    .deal-expires { font-family: var(--fm); font-size: 10px; color: var(--gold); margin-top: 2px; }
+
+    /* Best deals hero row */
+    .deal-hero-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .deal-hero-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .2s, transform .25s var(--ease-out-quart), box-shadow .25s;
+    }
+    .deal-hero-card:hover { border-color: var(--border-hi); transform: translateY(-4px); box-shadow: 0 14px 40px rgba(0,0,0,.65); }
+    .dhc-thumb { aspect-ratio: 16/9; overflow: hidden; position: relative; }
+    .dhc-thumb img { width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease-out-quart); }
+    .deal-hero-card:hover .dhc-thumb img { transform: scale(1.06); }
+    .dhc-off {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--green); color: #060709;
+      font-family: var(--fd); font-size: 18px; font-weight: 900;
+      padding: 4px 10px; border-radius: 3px;
+    }
+    .dhc-body { padding: 14px 16px 18px; }
+    .dhc-title { font-family: var(--fd); font-size: 15px; font-weight: 800; text-transform: uppercase; color: var(--t1); transition: color .15s; }
+    .deal-hero-card:hover .dhc-title { color: var(--gold); }
+    .dhc-prices { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .dhc-now { font-family: var(--fd); font-size: 20px; font-weight: 900; color: var(--green); }
+    .dhc-was { font-family: var(--fm); font-size: 12px; color: var(--t4); text-decoration: line-through; }
+    .dhc-store { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 4px; }
+
+    @media (max-width: 720px) { .deal-hero-row { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { .deal-card { grid-template-columns: 1fr; } .deal-img { aspect-ratio: 16/7; } }
+
+    /* Sidebar */
+    .deals-sidebar {}
+    .sidebar-box { background: var(--bg-1); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 20px; }
+    .sidebar-box-title { font-family: var(--fd); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--t3); margin-bottom: 16px; }
+    .store-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .store-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .store-name { font-family: var(--fm); font-size: 13px; color: var(--t1); }
+    .store-count { font-family: var(--fm); font-size: 11px; color: var(--t3); }
+    .store-badge { font-family: var(--fm); font-size: 10px; font-weight: 700; background: var(--gold); color: #060709; padding: 2px 6px; border-radius: 2px; }
+
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .filter-btn { font-family: var(--fm); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 7px 14px; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--t3); cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(240,165,0,.08); }
+
+    .newsletter-box { background: linear-gradient(135deg, rgba(240,165,0,.12), rgba(240,165,0,.04)); border: 1px solid rgba(240,165,0,.3); border-radius: 4px; padding: 24px; text-align: center; }
+    .nl-title { font-family: var(--fd); font-size: 16px; font-weight: 900; text-transform: uppercase; color: var(--t1); margin-bottom: 8px; }
+    .nl-sub { font-family: var(--fm); font-size: 12px; color: var(--t3); margin-bottom: 16px; }
+    .nl-input { width: 100%; padding: 10px 14px; background: var(--bg-0); border: 1px solid var(--border); border-radius: 3px; color: var(--t1); font-family: var(--fm); font-size: 13px; margin-bottom: 10px; box-sizing: border-box; }
+    .nl-input:focus { outline: none; border-color: var(--gold); }
+    .nl-btn { width: 100%; padding: 10px; background: var(--gold); color: #060709; font-family: var(--fd); font-size: 13px; font-weight: 800; text-transform: uppercase; border: none; border-radius: 3px; cursor: pointer; transition: opacity .15s; }
+    .nl-btn:hover { opacity: .88; }
+  </style>
+</head>
+<body>
+
+<header class="site-header scrolled">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></a>
+      <nav class="site-nav">
+        <a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a>
+        <a href="videos.html">Videos</a><a href="deals.html" class="active">Deals</a><a href="guides.html">Guides</a>
+      </nav>
+      <div class="header-right">
+        <button class="btn-icon" aria-label="Search"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m19 19-3.8-3.8"/></svg></button>
+        <button class="btn-signin">Sign In</button>
+        <button class="btn-menu" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h14M3 12h14M3 18h14"/></svg></button>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a>
+  <a href="videos.html">Videos</a><a href="deals.html" class="active">Deals</a><a href="guides.html">Guides</a>
+</nav>
+<div class="ticker">
+  <div class="ticker-label">Deals</div>
+  <div class="ticker-scroll"><div class="ticker-track">
+    <span class="ticker-item">DEAL: Elden Ring — 40% off on Steam this week</span>
+    <span class="ticker-item">DEAL: PS Plus Extra — 3 months for $24.99 (limited time)</span>
+    <span class="ticker-item">DEAL: Monster Hunter Wilds — $44.99 on CDKeys</span>
+    <span class="ticker-item">DEAL: Elden Ring — 40% off on Steam this week</span>
+    <span class="ticker-item">DEAL: PS Plus Extra — 3 months for $24.99 (limited time)</span>
+    <span class="ticker-item">DEAL: Monster Hunter Wilds — $44.99 on CDKeys</span>
+  </div></div>
+</div>
+
+<div class="page-top">
+  <div class="page-hero">
+    <div class="container">
+      <h1 class="page-hero-title">Deals</h1>
+      <p class="page-hero-sub">The best prices on the games worth playing — updated daily.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="deals-layout">
+      <div>
+        <!-- Best deals row -->
+        <div class="sec-head"><h2 class="sec-title">Best Deals Right Now</h2></div>
+        <div class="deal-hero-row stagger">
+          <div class="deal-hero-card fade-up">
+            <div class="dhc-thumb">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg" alt="Elden Ring" loading="lazy">
+              <div class="dhc-off">-40%</div>
+            </div>
+            <div class="dhc-body">
+              <div class="dhc-title">Elden Ring</div>
+              <div class="dhc-prices">
+                <span class="dhc-now">$29.99</span>
+                <span class="dhc-was">$49.99</span>
+              </div>
+              <div class="dhc-store">Steam · Ends Jun 30</div>
+            </div>
+          </div>
+          <div class="deal-hero-card fade-up">
+            <div class="dhc-thumb">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="Monster Hunter Wilds" loading="lazy">
+              <div class="dhc-off">-10%</div>
+            </div>
+            <div class="dhc-body">
+              <div class="dhc-title">Monster Hunter Wilds</div>
+              <div class="dhc-prices">
+                <span class="dhc-now">$53.99</span>
+                <span class="dhc-was">$59.99</span>
+              </div>
+              <div class="dhc-store">CDKeys · Always on</div>
+            </div>
+          </div>
+          <div class="deal-hero-card fade-up">
+            <div class="dhc-thumb">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/2683250/header.jpg" alt="Metaphor ReFantazio" loading="lazy">
+              <div class="dhc-off">-25%</div>
+            </div>
+            <div class="dhc-body">
+              <div class="dhc-title">Metaphor: ReFantazio</div>
+              <div class="dhc-prices">
+                <span class="dhc-now">$44.99</span>
+                <span class="dhc-was">$59.99</span>
+              </div>
+              <div class="dhc-store">Fanatical · Ends Jul 4</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <button class="filter-btn active">All Deals</button>
+          <button class="filter-btn">PC</button>
+          <button class="filter-btn">PlayStation</button>
+          <button class="filter-btn">Xbox</button>
+          <button class="filter-btn">Nintendo</button>
+          <button class="filter-btn">Under $20</button>
+        </div>
+
+        <div class="sec-head"><h2 class="sec-title">All Deals</h2></div>
+
+        <!-- Deal list -->
+        <div class="deal-card fade-up">
+          <div class="deal-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2835570/header.jpg" alt="Doom Dark Ages" loading="lazy"></div>
+          <div class="deal-body">
+            <div class="deal-top">
+              <div class="deal-tags"><span class="tag t-hot">Hot</span><span class="tag t-excl">PC</span></div>
+              <div class="deal-title">Doom: The Dark Ages</div>
+              <div class="deal-platform">PC · Xbox Game Pass</div>
+            </div>
+            <div>
+              <div class="deal-prices">
+                <span class="price-now">$0.00</span>
+                <span class="price-was">$69.99</span>
+                <span class="price-off">Game Pass</span>
+              </div>
+              <div class="deal-store">Xbox Game Pass Ultimate</div>
+              <div class="deal-expires">Included with subscription</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="deal-card fade-up">
+          <div class="deal-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="Clair Obscur" loading="lazy"></div>
+          <div class="deal-body">
+            <div class="deal-top">
+              <div class="deal-tags"><span class="tag t-hot">Hot</span><span class="tag t-excl">All Platforms</span></div>
+              <div class="deal-title">Clair Obscur: Expedition 33</div>
+              <div class="deal-platform">PC · PS5 · Xbox · Game Pass</div>
+            </div>
+            <div>
+              <div class="deal-prices">
+                <span class="price-now">$0.00</span>
+                <span class="price-was">$49.99</span>
+                <span class="price-off">Game Pass</span>
+              </div>
+              <div class="deal-store">Xbox Game Pass / PC Game Pass</div>
+              <div class="deal-expires">Included with subscription</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="deal-card fade-up">
+          <div class="deal-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2358720/header.jpg" alt="Black Myth Wukong" loading="lazy"></div>
+          <div class="deal-body">
+            <div class="deal-top">
+              <div class="deal-tags"><span class="tag t-review">PC / PS5</span></div>
+              <div class="deal-title">Black Myth: Wukong</div>
+              <div class="deal-platform">PC · PlayStation 5</div>
+            </div>
+            <div>
+              <div class="deal-prices">
+                <span class="price-now">$35.99</span>
+                <span class="price-was">$59.99</span>
+                <span class="price-off">-40%</span>
+              </div>
+              <div class="deal-store">Fanatical</div>
+              <div class="deal-expires">Ends Jul 7, 2025</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="deal-card fade-up">
+          <div class="deal-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2778580/header.jpg" alt="Elden Ring DLC" loading="lazy"></div>
+          <div class="deal-body">
+            <div class="deal-top">
+              <div class="deal-tags"><span class="tag t-review">PC / Console</span></div>
+              <div class="deal-title">Elden Ring: Shadow of the Erdtree DLC</div>
+              <div class="deal-platform">PC · PS5 · Xbox</div>
+            </div>
+            <div>
+              <div class="deal-prices">
+                <span class="price-now">$23.99</span>
+                <span class="price-was">$39.99</span>
+                <span class="price-off">-40%</span>
+              </div>
+              <div class="deal-store">Steam</div>
+              <div class="deal-expires">Ends Jun 30, 2025</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="deal-card fade-up">
+          <div class="deal-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/1145350/header.jpg" alt="Hades 2" loading="lazy"></div>
+          <div class="deal-body">
+            <div class="deal-top">
+              <div class="deal-tags"><span class="tag t-preview">Early Access</span></div>
+              <div class="deal-title">Hades 2</div>
+              <div class="deal-platform">PC</div>
+            </div>
+            <div>
+              <div class="deal-prices">
+                <span class="price-now">$24.99</span>
+                <span class="price-was">$29.99</span>
+                <span class="price-off">-17%</span>
+              </div>
+              <div class="deal-store">Green Man Gaming</div>
+              <div class="deal-expires">Ongoing</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="deal-card fade-up">
+          <div class="deal-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg" alt="Cyberpunk 2077" loading="lazy"></div>
+          <div class="deal-body">
+            <div class="deal-top">
+              <div class="deal-tags"><span class="tag t-news">PC / Console</span></div>
+              <div class="deal-title">Cyberpunk 2077 + Phantom Liberty Bundle</div>
+              <div class="deal-platform">PC · PS5 · Xbox</div>
+            </div>
+            <div>
+              <div class="deal-prices">
+                <span class="price-now">$23.99</span>
+                <span class="price-was">$79.99</span>
+                <span class="price-off">-70%</span>
+              </div>
+              <div class="deal-store">GOG</div>
+              <div class="deal-expires">Ends Jul 1, 2025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="deals-sidebar">
+        <div class="sidebar-box">
+          <div class="sidebar-box-title">Deals by Store</div>
+          <div class="store-row">
+            <span class="store-name">Steam</span>
+            <div style="display:flex;align-items:center;gap:8px;"><span class="store-count">48 deals</span><span class="store-badge">Summer Sale</span></div>
+          </div>
+          <div class="store-row">
+            <span class="store-name">Xbox Game Pass</span>
+            <span class="store-count">12 new games</span>
+          </div>
+          <div class="store-row">
+            <span class="store-name">PlayStation Store</span>
+            <span class="store-count">31 deals</span>
+          </div>
+          <div class="store-row">
+            <span class="store-name">Fanatical</span>
+            <span class="store-count">22 deals</span>
+          </div>
+          <div class="store-row">
+            <span class="store-name">CDKeys</span>
+            <span class="store-count">15 deals</span>
+          </div>
+          <div class="store-row">
+            <span class="store-name">Green Man Gaming</span>
+            <span class="store-count">19 deals</span>
+          </div>
+        </div>
+
+        <div class="sidebar-box">
+          <div class="sidebar-box-title">Free to Play This Week</div>
+          <div style="padding: 8px 0; border-bottom: 1px solid var(--border);">
+            <div style="font-family:var(--fm);font-size:13px;color:var(--t1);">Warframe</div>
+            <div style="font-family:var(--fm);font-size:10px;color:var(--t3);margin-top:2px;">Steam · Always free</div>
+          </div>
+          <div style="padding: 8px 0; border-bottom: 1px solid var(--border);">
+            <div style="font-family:var(--fm);font-size:13px;color:var(--t1);">Deep Rock Galactic</div>
+            <div style="font-family:var(--fm);font-size:10px;color:var(--gold);margin-top:2px;">Free weekend · Ends Sun</div>
+          </div>
+          <div style="padding: 8px 0;">
+            <div style="font-family:var(--fm);font-size:13px;color:var(--t1);">Alan Wake 2</div>
+            <div style="font-family:var(--fm);font-size:10px;color:var(--gold);margin-top:2px;">Epic Games — Free until Jul 3</div>
+          </div>
+        </div>
+
+        <div class="newsletter-box">
+          <div class="nl-title">Deal Alerts</div>
+          <div class="nl-sub">Get the best prices in your inbox before they expire.</div>
+          <input class="nl-input" type="email" placeholder="your@email.com">
+          <button class="nl-btn">Get Alerts</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></div>
+        <p class="footer-tagline">The pulse of gaming — news, reviews, and culture, unfiltered.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><div class="footer-col-head">Coverage</div><a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="videos.html">Videos</a></div>
+        <div class="footer-col"><div class="footer-col-head">Platforms</div><a href="#">PlayStation</a><a href="#">Xbox</a><a href="#">PC</a></div>
+        <div class="footer-col"><div class="footer-col-head">Company</div><a href="#">About</a><a href="#">Careers</a></div>
+        <div class="footer-col"><div class="footer-col-head">Follow</div><a href="#">YouTube</a><a href="#">Twitter</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 <span class="accent">LOADOUT.GG</span>. All rights reserved.</div>
+      <div class="footer-copy">Privacy &nbsp;·&nbsp; Terms</div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News — LOADOUT.GG</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-hero { background: var(--bg-1); border-bottom: 1px solid var(--border); padding: 48px 0 36px; }
+    .page-hero-title { font-family: var(--fd); font-size: clamp(42px,6vw,72px); font-weight: 900; text-transform: uppercase; color: var(--t1); letter-spacing: -1px; }
+    .page-hero-sub { font-size: 14px; color: var(--t2); margin-top: 8px; max-width: 500px; }
+
+    .news-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 44px;
+      padding: 44px 0;
+    }
+
+    /* Category tabs */
+    .cat-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .cat-tab {
+      font-family: var(--fm);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--t3);
+      padding: 10px 16px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .cat-tab:hover { color: var(--t2); }
+    .cat-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* Big news card */
+    .news-big {
+      display: grid;
+      grid-template-columns: 1fr;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 2px;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .25s;
+    }
+    .news-big:hover { border-color: var(--border-hi); box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+    .nb-img { height: 280px; overflow: hidden; position: relative; }
+    .nb-img img { width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease-out-quart); }
+    .news-big:hover .nb-img img { transform: scale(1.05); }
+    .nb-img::after { content:''; position:absolute; bottom:0; left:0; right:0; height:50%; background: linear-gradient(to top, var(--bg-1), transparent); }
+    .nb-body { padding: 24px 28px 28px; }
+    .nb-tags { display:flex; gap:8px; margin-bottom:14px; align-items:center; }
+    .nb-title {
+      font-family: var(--fd);
+      font-size: 28px;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--t1);
+      line-height: 1.0;
+      margin-bottom: 12px;
+      transition: color .15s;
+    }
+    .news-big:hover .nb-title { color: var(--gold); }
+    .nb-body p { font-size: 14px; color: var(--t2); line-height: 1.65; }
+    .nb-meta { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 14px; }
+
+    /* News list items */
+    .news-list { display:flex; flex-direction:column; }
+    .news-item {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .news-item:last-child { border-bottom: none; }
+    .ni-thumb { width:96px; height:64px; border-radius:3px; overflow:hidden; flex-shrink:0; }
+    .ni-thumb img { width:100%;height:100%;object-fit:cover;transition:transform .4s; }
+    .news-item:hover .ni-thumb img { transform: scale(1.08); }
+    .ni-tags { display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
+    .ni-title {
+      font-family: var(--fd);
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--t1);
+      line-height: 1.08;
+      margin-bottom: 4px;
+      transition: color .15s;
+    }
+    .news-item:hover .ni-title { color: var(--gold); }
+    .ni-excerpt { font-size: 12px; color: var(--t2); line-height: 1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .ni-meta { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 6px; }
+
+    /* Sidebar */
+    .sidebar-block { margin-bottom: 36px; }
+    .trending-list {}
+    .tr-item {
+      display:flex; gap:14px;
+      padding:12px 0;
+      border-bottom: 1px solid var(--border);
+      cursor:pointer;
+    }
+    .tr-item:last-child { border-bottom: none; }
+    .tr-n { font-family:var(--fd); font-size:28px; font-weight:900; color:var(--border-hi); line-height:1; width:24px; flex-shrink:0; }
+    .tr-title { font-family:var(--fd); font-size:13px; font-weight:700; text-transform:uppercase; color:var(--t2); line-height:1.25; padding-top:4px; transition:color .15s; }
+    .tr-item:hover .tr-title { color:var(--t1); }
+    .tr-sub { font-family:var(--fm); font-size:10px; color:var(--t3); margin-top:4px; }
+
+    @media (max-width: 1024px) {
+      .news-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header scrolled">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></a>
+      <nav class="site-nav">
+        <a href="news.html" class="active">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a>
+        <a href="videos.html">Videos</a><a href="deals.html">Deals</a><a href="guides.html">Guides</a>
+      </nav>
+      <div class="header-right">
+        <button class="btn-icon" aria-label="Search"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m19 19-3.8-3.8"/></svg></button>
+        <button class="btn-signin">Sign In</button>
+        <button class="btn-menu" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h14M3 12h14M3 18h14"/></svg></button>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="news.html" class="active">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a>
+  <a href="videos.html">Videos</a><a href="deals.html">Deals</a><a href="guides.html">Guides</a>
+</nav>
+<div class="ticker">
+  <div class="ticker-label">Breaking</div>
+  <div class="ticker-scroll"><div class="ticker-track">
+    <span class="ticker-item">GTA VI release window confirmed — Rockstar targets Fall 2025</span>
+    <span class="ticker-item">Nintendo Switch 2 opens preorders — ships June 5</span>
+    <span class="ticker-item">FromSoftware Nightreign open beta: 3 million players in 48 hours</span>
+    <span class="ticker-item">Xbox Game Pass Ultimate adds 18 titles this month</span>
+    <span class="ticker-item">GTA VI release window confirmed — Rockstar targets Fall 2025</span>
+    <span class="ticker-item">Nintendo Switch 2 opens preorders — ships June 5</span>
+    <span class="ticker-item">FromSoftware Nightreign open beta: 3 million players in 48 hours</span>
+    <span class="ticker-item">Xbox Game Pass Ultimate adds 18 titles this month</span>
+  </div></div>
+</div>
+
+<div class="page-top">
+  <div class="page-hero">
+    <div class="container">
+      <h1 class="page-hero-title">News</h1>
+      <p class="page-hero-sub">The latest from across the gaming industry — releases, announcements, and everything in between.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="news-layout">
+      <main>
+        <div class="cat-tabs">
+          <button class="cat-tab active">All</button>
+          <button class="cat-tab">Industry</button>
+          <button class="cat-tab">Releases</button>
+          <button class="cat-tab">Hardware</button>
+          <button class="cat-tab">Esports</button>
+          <button class="cat-tab">PC Gaming</button>
+        </div>
+
+        <!-- Big story -->
+        <div class="news-big fade-up">
+          <div class="nb-img">
+            <img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="GTA VI" loading="lazy">
+          </div>
+          <div class="nb-body">
+            <div class="nb-tags">
+              <span class="tag t-hot">Breaking</span>
+              <span class="tag t-news">Industry</span>
+              <span style="font-family:var(--fm);font-size:10px;color:var(--t3);">June 20, 2025</span>
+            </div>
+            <h2 class="nb-title">Rockstar Officially Confirms GTA VI for Fall 2025 — Full Gameplay Reveal Next Month</h2>
+            <p>After years of speculation, Rockstar Games has confirmed Grand Theft Auto VI will launch in Fall 2025 for PlayStation 5 and Xbox Series X/S, with a PC version following in 2026. The announcement was accompanied by a second trailer and a promise of a full gameplay showcase at a dedicated event next month. The company also confirmed the controversial $80 price point for the standard edition.</p>
+            <div class="nb-meta">Sam Torres &nbsp;·&nbsp; 2 hours ago</div>
+          </div>
+        </div>
+
+        <!-- News list -->
+        <div class="news-list stagger" style="margin-top:2px;">
+
+          <div class="news-item fade-up">
+            <div class="ni-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2183900/header.jpg" alt="" loading="lazy"></div>
+            <div>
+              <div class="ni-tags"><span class="tag t-news">Update</span></div>
+              <div class="ni-title">Space Marine 2 Season 5: New Campaign Chapter, Chaos Faction, and 2 Operations</div>
+              <div class="ni-excerpt">Saber Interactive's biggest content update yet arrives June 30. The new chapter reveals the fate of the Iron Warriors siege, and the Chaos Space Marine playable faction overhaul changes PvP fundamentally.</div>
+              <div class="ni-meta">Aiko Tanaka &nbsp;·&nbsp; Jun 19, 2025</div>
+            </div>
+          </div>
+
+          <div class="news-item fade-up">
+            <div class="ni-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2835570/header.jpg" alt="" loading="lazy"></div>
+            <div>
+              <div class="ni-tags"><span class="tag t-news">DLC</span></div>
+              <div class="ni-title">Doom: The Dark Ages — "The Wrathful Deep" DLC Announced for September</div>
+              <div class="ni-excerpt">id Software reveals the first expansion for their 2025 shooter, set beneath the demonic ocean floor. New weapons include the Abyssal Spear and the Leviathan Cannon. Two new boss encounters confirmed.</div>
+              <div class="ni-meta">Marcus Webb &nbsp;·&nbsp; Jun 18, 2025</div>
+            </div>
+          </div>
+
+          <div class="news-item fade-up">
+            <div class="ni-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="" loading="lazy"></div>
+            <div>
+              <div class="ni-tags"><span class="tag t-news">Sales</span></div>
+              <div class="ni-title">Monster Hunter Wilds Reaches 15 Million Copies Sold — Fastest in Franchise History</div>
+              <div class="ni-excerpt">Capcom confirms the milestone just four months after launch. Title Update 2, arriving July, adds the apex predator Arkveld variant and the brand-new Quematrice monster to the roster.</div>
+              <div class="ni-meta">Jin Park &nbsp;·&nbsp; Jun 17, 2025</div>
+            </div>
+          </div>
+
+          <div class="news-item fade-up">
+            <div class="ni-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/1145350/header.jpg" alt="" loading="lazy"></div>
+            <div>
+              <div class="ni-tags"><span class="tag t-news">Release</span></div>
+              <div class="ni-title">Hades 2 Version 1.0 — Full Launch Date Set for August 2025</div>
+              <div class="ni-excerpt">Supergiant confirms the full release window alongside a new biome, three new weapons, and an extended epilogue resolving the story threads opened in Early Access. Save data carries forward.</div>
+              <div class="ni-meta">Priya Nair &nbsp;·&nbsp; Jun 15, 2025</div>
+            </div>
+          </div>
+
+          <div class="news-item fade-up">
+            <div class="ni-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="" loading="lazy"></div>
+            <div>
+              <div class="ni-tags"><span class="tag t-news">Awards</span></div>
+              <div class="ni-title">Clair Obscur Takes 14 of 20 Categories at Summer Game Awards 2025</div>
+              <div class="ni-excerpt">Sandfall Interactive's debut RPG swept the ceremony, winning Game of the Year, Best Narrative, Best Score, and Best New Studio among others. Lead writer Guilhem Desq accepted with visible disbelief.</div>
+              <div class="ni-meta">Lin Chen &nbsp;·&nbsp; Jun 14, 2025</div>
+            </div>
+          </div>
+
+          <div class="news-item fade-up">
+            <div class="ni-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2683250/header.jpg" alt="" loading="lazy"></div>
+            <div>
+              <div class="ni-tags"><span class="tag t-news">Hardware</span></div>
+              <div class="ni-title">PlayStation 6 Officially Confirmed — Sony Targets Holiday 2026 Launch</div>
+              <div class="ni-excerpt">After months of speculation, Sony Interactive Entertainment confirms next-generation hardware is in active development with a Holiday 2026 target. Backwards compatibility with PS5 titles confirmed at launch.</div>
+              <div class="ni-meta">Sam Torres &nbsp;·&nbsp; Jun 10, 2025</div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      <aside>
+        <div class="sidebar-block">
+          <div class="sec-head"><h2 class="sec-title">Trending</h2></div>
+          <div class="trending-list">
+            <div class="tr-item">
+              <div class="tr-n">1</div>
+              <div><div class="tr-title">GTA VI Fall 2025 — Everything Confirmed</div><div class="tr-sub">47k views today</div></div>
+            </div>
+            <div class="tr-item">
+              <div class="tr-n">2</div>
+              <div><div class="tr-title">Nightreign Beta — Tips & First Impressions</div><div class="tr-sub">31k views today</div></div>
+            </div>
+            <div class="tr-item">
+              <div class="tr-n">3</div>
+              <div><div class="tr-title">Switch 2 vs PS5 — 2025 Platform Comparison</div><div class="tr-sub">28k views today</div></div>
+            </div>
+            <div class="tr-item">
+              <div class="tr-n">4</div>
+              <div><div class="tr-title">Clair Obscur Awards Sweep — Sandfall Reacts</div><div class="tr-sub">22k views today</div></div>
+            </div>
+            <div class="tr-item">
+              <div class="tr-n">5</div>
+              <div><div class="tr-title">PS6 Specs — What We Know So Far</div><div class="tr-sub">19k views today</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-block">
+          <div class="sec-head"><h2 class="sec-title">By Platform</h2></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="#" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);color:var(--t2);font-size:13px;transition:color .15s;" onmouseenter="this.style.color='var(--t1)'" onmouseleave="this.style.color='var(--t2)'">PlayStation <span style="font-family:var(--fm);font-size:10px;color:var(--t3);">128 stories</span></a>
+            <a href="#" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);color:var(--t2);font-size:13px;transition:color .15s;" onmouseenter="this.style.color='var(--t1)'" onmouseleave="this.style.color='var(--t2)'">Xbox <span style="font-family:var(--fm);font-size:10px;color:var(--t3);">94 stories</span></a>
+            <a href="#" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);color:var(--t2);font-size:13px;transition:color .15s;" onmouseenter="this.style.color='var(--t1)'" onmouseleave="this.style.color='var(--t2)'">PC Gaming <span style="font-family:var(--fm);font-size:10px;color:var(--t3);">213 stories</span></a>
+            <a href="#" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);color:var(--t2);font-size:13px;transition:color .15s;" onmouseenter="this.style.color='var(--t1)'" onmouseleave="this.style.color='var(--t2)'">Nintendo <span style="font-family:var(--fm);font-size:10px;color:var(--t3);">77 stories</span></a>
+            <a href="#" style="display:flex;justify-content:space-between;padding:10px 0;color:var(--t2);font-size:13px;transition:color .15s;" onmouseenter="this.style.color='var(--t1)'" onmouseleave="this.style.color='var(--t2)'">Mobile <span style="font-family:var(--fm);font-size:10px;color:var(--t3);">45 stories</span></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></div>
+        <p class="footer-tagline">The pulse of gaming — news, reviews, and culture, unfiltered.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><div class="footer-col-head">Coverage</div><a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a></div>
+        <div class="footer-col"><div class="footer-col-head">Platforms</div><a href="#">PlayStation</a><a href="#">Xbox</a><a href="#">PC</a></div>
+        <div class="footer-col"><div class="footer-col-head">Company</div><a href="#">About</a><a href="#">Careers</a></div>
+        <div class="footer-col"><div class="footer-col-head">Follow</div><a href="#">Twitter</a><a href="#">Discord</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 <span class="accent">LOADOUT.GG</span>. All rights reserved.</div>
+      <div class="footer-copy">Privacy &nbsp;·&nbsp; Terms</div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  document.querySelectorAll('.cat-tab').forEach(t => {
+    t.addEventListener('click', () => { document.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active')); t.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

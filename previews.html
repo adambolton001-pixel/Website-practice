@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Previews — LOADOUT.GG</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-hero { background: var(--bg-1); border-bottom: 1px solid var(--border); padding: 48px 0 36px; }
+    .page-hero-title { font-family: var(--fd); font-size: clamp(42px,6vw,72px); font-weight: 900; text-transform: uppercase; color: var(--t1); letter-spacing: -1px; }
+    .page-hero-sub { font-size: 14px; color: var(--t2); margin-top: 8px; max-width: 500px; }
+
+    /* Release calendar strip */
+    .cal-strip {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px 28px;
+      margin: 40px 0;
+    }
+    .cal-title { font-family: var(--fd); font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--t3); margin-bottom: 16px; }
+    .cal-months { display: flex; gap: 0; overflow-x: auto; }
+    .cal-month {
+      flex-shrink: 0;
+      padding: 0 20px;
+      border-right: 1px solid var(--border);
+    }
+    .cal-month:first-child { padding-left: 0; }
+    .cal-month-name { font-family: var(--fm); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-bottom: 12px; }
+    .cal-game {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      cursor: pointer;
+    }
+    .cal-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+    .cal-dot.blue { background: var(--blue); }
+    .cal-dot.green { background: var(--green); }
+    .cal-game-name { font-size: 12px; color: var(--t2); white-space: nowrap; transition: color .15s; }
+    .cal-game:hover .cal-game-name { color: var(--gold); }
+    .cal-game-date { font-family: var(--fm); font-size: 9px; color: var(--t3); margin-top: 1px; }
+
+    /* Preview cards */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .prev-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .2s, transform .25s var(--ease-out-quart), box-shadow .25s;
+    }
+    .prev-card:hover { border-color: var(--border-hi); transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,.7); }
+    .prev-img { height: 210px; overflow: hidden; position: relative; }
+    .prev-img img { width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease-out-quart); }
+    .prev-card:hover .prev-img img { transform: scale(1.06); }
+    .prev-release {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: rgba(6,7,9,.88);
+      border: 1px solid var(--border-hi);
+      padding: 6px 10px;
+      font-family: var(--fm);
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      backdrop-filter: blur(6px);
+    }
+    .prev-body { padding: 20px 22px 24px; }
+    .prev-tags { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+    .prev-title { font-family: var(--fd); font-size: 22px; font-weight: 800; text-transform: uppercase; color: var(--t1); line-height: 1.05; margin-bottom: 10px; transition: color .15s; }
+    .prev-card:hover .prev-title { color: var(--gold); }
+    .prev-desc { font-size: 13px; color: var(--t2); line-height: 1.6; }
+    .prev-meta { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 10px; }
+
+    /* Anticipation meter */
+    .ant-meter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .ant-label { font-family: var(--fm); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--t3); }
+    .ant-bar-bg { flex: 1; height: 3px; background: var(--bg-4); border-radius: 2px; }
+    .ant-bar { height: 100%; border-radius: 2px; background: linear-gradient(to right, var(--gold), var(--gold-hi)); transition: width 1s var(--ease-out-expo); }
+    .ant-pct { font-family: var(--fm); font-size: 9px; color: var(--gold); }
+
+    @media (max-width: 768px) { .preview-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header class="site-header scrolled">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></a>
+      <nav class="site-nav">
+        <a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html" class="active">Previews</a>
+        <a href="videos.html">Videos</a><a href="deals.html">Deals</a><a href="guides.html">Guides</a>
+      </nav>
+      <div class="header-right">
+        <button class="btn-icon" aria-label="Search"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m19 19-3.8-3.8"/></svg></button>
+        <button class="btn-signin">Sign In</button>
+        <button class="btn-menu" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h14M3 12h14M3 18h14"/></svg></button>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html" class="active">Previews</a>
+  <a href="videos.html">Videos</a><a href="deals.html">Deals</a><a href="guides.html">Guides</a>
+</nav>
+<div class="ticker">
+  <div class="ticker-label">Upcoming</div>
+  <div class="ticker-scroll"><div class="ticker-track">
+    <span class="ticker-item">GTA VI — Fall 2025 · PS5 &amp; Xbox Series</span>
+    <span class="ticker-item">Hades 2 V1.0 — August 2025 · PC</span>
+    <span class="ticker-item">FromSoftware Nightreign — September 2025</span>
+    <span class="ticker-item">Hollow Knight: Silksong — 2025 · All Platforms</span>
+    <span class="ticker-item">Doom DLC "The Wrathful Deep" — September 2025</span>
+    <span class="ticker-item">GTA VI — Fall 2025 · PS5 &amp; Xbox Series</span>
+    <span class="ticker-item">Hades 2 V1.0 — August 2025 · PC</span>
+    <span class="ticker-item">FromSoftware Nightreign — September 2025</span>
+    <span class="ticker-item">Hollow Knight: Silksong — 2025 · All Platforms</span>
+    <span class="ticker-item">Doom DLC "The Wrathful Deep" — September 2025</span>
+  </div></div>
+</div>
+
+<div class="page-top">
+  <div class="page-hero">
+    <div class="container">
+      <h1 class="page-hero-title">Previews</h1>
+      <p class="page-hero-sub">Hands-on time, developer access, and considered first impressions — everything coming to screens near you.</p>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Release calendar -->
+    <div class="cal-strip fade-up">
+      <div class="cal-title">Release Calendar — 2025</div>
+      <div class="cal-months">
+        <div class="cal-month">
+          <div class="cal-month-name">July</div>
+          <div class="cal-game"><div class="cal-dot"></div><div><div class="cal-game-name">MH Wilds TU2</div><div class="cal-game-date">Jul 15</div></div></div>
+          <div class="cal-game"><div class="cal-dot blue"></div><div><div class="cal-game-name">Ys X: Nordics PC</div><div class="cal-game-date">Jul 22</div></div></div>
+        </div>
+        <div class="cal-month">
+          <div class="cal-month-name">August</div>
+          <div class="cal-game"><div class="cal-dot green"></div><div><div class="cal-game-name">Hades 2 V1.0</div><div class="cal-game-date">Aug 12</div></div></div>
+          <div class="cal-game"><div class="cal-dot"></div><div><div class="cal-game-name">Little Big Adventure Twinsen's Quest</div><div class="cal-game-date">Aug 28</div></div></div>
+        </div>
+        <div class="cal-month">
+          <div class="cal-month-name">September</div>
+          <div class="cal-game"><div class="cal-dot green"></div><div><div class="cal-game-name">Nightreign</div><div class="cal-game-date">Sep 3</div></div></div>
+          <div class="cal-game"><div class="cal-dot"></div><div><div class="cal-game-name">Doom: The Wrathful Deep</div><div class="cal-game-date">Sep 18</div></div></div>
+        </div>
+        <div class="cal-month">
+          <div class="cal-month-name">Q4 2025</div>
+          <div class="cal-game"><div class="cal-dot"></div><div><div class="cal-game-name">GTA VI</div><div class="cal-game-date">Fall 2025</div></div></div>
+          <div class="cal-game"><div class="cal-dot blue"></div><div><div class="cal-game-name">Hollow Knight: Silksong</div><div class="cal-game-date">2025 TBA</div></div></div>
+          <div class="cal-game"><div class="cal-dot green"></div><div><div class="cal-game-name">MH Wilds TU3</div><div class="cal-game-date">TBA</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Previews -->
+    <div class="sec-head">
+      <h2 class="sec-title">Hands-On Previews</h2>
+    </div>
+
+    <div class="preview-grid stagger">
+
+      <div class="prev-card fade-up">
+        <div class="prev-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/1030300/header.jpg" alt="Hollow Knight: Silksong" loading="lazy">
+          <div class="prev-release">2025</div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tags"><span class="tag t-preview">Preview</span><span class="plat">PC · Switch · PS · Xbox</span></div>
+          <h3 class="prev-title">Hollow Knight: Silksong — We Played Four Hours. Finally.</h3>
+          <p class="prev-desc">After six years of waiting, Team Cherry's sequel is more than a follow-up — it's a complete reimagining of what a Hollow Knight game can be. Hornet controls faster and more fluidly than Grimm. The combat has an aggression and rhythm the original deliberately avoided. The biomes we saw — three of an apparent eight — are among the most visually inventive in the series.</p>
+          <div class="prev-meta">Priya Nair &nbsp;·&nbsp; Jun 10, 2025</div>
+          <div class="ant-meter">
+            <span class="ant-label">Anticipation</span>
+            <div class="ant-bar-bg"><div class="ant-bar" style="width:97%"></div></div>
+            <span class="ant-pct">97%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prev-card fade-up">
+        <div class="prev-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2183900/header.jpg" alt="Nightreign" loading="lazy">
+          <div class="prev-release">Sep 2025</div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tags"><span class="tag t-preview">Preview</span><span class="plat">PS5 · Xbox · PC</span></div>
+          <h3 class="prev-title">Elden Ring Nightreign Beta — FromSoftware's Co-op Gamble Pays Off</h3>
+          <p class="prev-desc">Three players, a condensed Elden Ring map, escalating threat, and a final boss drawn from the lore you've half-remembered since 2022. After three hours in the open beta, Nightreign feels like the extraction roguelite FromSoftware was always going to make eventually. The question was always when, not if.</p>
+          <div class="prev-meta">Marcus Webb &nbsp;·&nbsp; Jun 5, 2025</div>
+          <div class="ant-meter">
+            <span class="ant-label">Anticipation</span>
+            <div class="ant-bar-bg"><div class="ant-bar" style="width:88%"></div></div>
+            <span class="ant-pct">88%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prev-card fade-up">
+        <div class="prev-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/1145350/header.jpg" alt="Hades 2" loading="lazy">
+          <div class="prev-release">Aug 2025</div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tags"><span class="tag t-preview">Preview</span><span class="plat">PC</span></div>
+          <h3 class="prev-title">Hades 2 Version 1.0 — Supergiant Shows Final Hours of Content</h3>
+          <p class="prev-desc">The last major Early Access patch arrives ahead of V1.0, completing the surface biomes and wrapping the central narrative thread. We played the new finale. It sticks the landing in a way that felt genuinely impossible given the accumulated weight of two years of community investment.</p>
+          <div class="prev-meta">Priya Nair &nbsp;·&nbsp; May 28, 2025</div>
+          <div class="ant-meter">
+            <span class="ant-label">Anticipation</span>
+            <div class="ant-bar-bg"><div class="ant-bar" style="width:92%"></div></div>
+            <span class="ant-pct">92%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prev-card fade-up">
+        <div class="prev-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="Monster Hunter Wilds TU2" loading="lazy">
+          <div class="prev-release">Jul 2025</div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tags"><span class="tag t-preview">Preview</span><span class="plat">PS5 · Xbox · PC</span></div>
+          <h3 class="prev-title">Monster Hunter Wilds Title Update 2 — Two Apex Monsters, New Siege Events</h3>
+          <p class="prev-desc">Capcom showed us the Arkveld variant in action: faster, more aggressive, with a completely reworked second phase that adds a chaotic aura field. The new siege event structure lets up to 16 hunters participate in coordinated ecosystem hunts that escalate in stages. It's exactly the endgame extension the community has been asking for.</p>
+          <div class="prev-meta">Jin Park &nbsp;·&nbsp; Jun 8, 2025</div>
+          <div class="ant-meter">
+            <span class="ant-label">Anticipation</span>
+            <div class="ant-bar-bg"><div class="ant-bar" style="width:85%"></div></div>
+            <span class="ant-pct">85%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></div>
+        <p class="footer-tagline">The pulse of gaming — news, reviews, and culture, unfiltered.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><div class="footer-col-head">Coverage</div><a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a></div>
+        <div class="footer-col"><div class="footer-col-head">Platforms</div><a href="#">PlayStation</a><a href="#">Xbox</a><a href="#">PC</a></div>
+        <div class="footer-col"><div class="footer-col-head">Company</div><a href="#">About</a><a href="#">Careers</a></div>
+        <div class="footer-col"><div class="footer-col-head">Follow</div><a href="#">Twitter</a><a href="#">Discord</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 <span class="accent">LOADOUT.GG</span>. All rights reserved.</div>
+      <div class="footer-copy">Privacy &nbsp;·&nbsp; Terms</div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

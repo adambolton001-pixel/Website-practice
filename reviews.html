@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviews — LOADOUT.GG</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-hero {
+      background: var(--bg-1);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 0 36px;
+    }
+    .page-hero-title { font-family: var(--fd); font-size: clamp(42px,6vw,72px); font-weight: 900; text-transform: uppercase; color: var(--t1); letter-spacing: -1px; }
+    .page-hero-sub { font-size: 14px; color: var(--t2); margin-top: 8px; max-width: 500px; line-height: 1.6; }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .filter-label { font-family: var(--fm); font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: var(--t3); margin-right: 4px; }
+    .filter-btn {
+      font-family: var(--fm);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--t2);
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: color .15s, background .15s, border-color .15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      color: var(--gold);
+      background: rgba(240,165,0,.08);
+      border-color: rgba(240,165,0,.3);
+    }
+
+    /* Featured review (horizontal) */
+    .review-feature {
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      gap: 0;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 48px;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .25s;
+    }
+    .review-feature:hover {
+      border-color: var(--border-hi);
+      box-shadow: 0 16px 48px rgba(0,0,0,.7);
+    }
+    .rf-body {
+      padding: 40px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .rf-tags { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+    .rf-title {
+      font-family: var(--fd);
+      font-size: clamp(28px,3.5vw,48px);
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--t1);
+      line-height: .95;
+      margin-bottom: 16px;
+      transition: color .15s;
+    }
+    .review-feature:hover .rf-title { color: var(--gold); }
+    .rf-excerpt { font-size: 15px; color: var(--t2); line-height: 1.7; margin-bottom: 24px; }
+    .rf-footer { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .rf-author { font-size: 12px; color: var(--t3); }
+    .rf-author strong { color: var(--t2); font-weight: 600; }
+    .rf-img {
+      position: relative;
+      overflow: hidden;
+    }
+    .rf-img img { width:100%; height:100%; object-fit:cover; transition: transform .5s var(--ease-out-quart); }
+    .review-feature:hover .rf-img img { transform: scale(1.05); }
+    .rf-score {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: rgba(6,7,9,.9);
+      border: 1px solid var(--border-hi);
+      padding: 14px 16px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+    }
+    .rf-score-label { font-family: var(--fm); font-size: 8px; letter-spacing: .16em; text-transform: uppercase; color: var(--t3); margin-bottom: 4px; }
+
+    /* Reviews grid */
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 60px;
+    }
+    .review-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .2s, transform .25s var(--ease-out-quart), box-shadow .25s;
+    }
+    .review-card:hover {
+      border-color: var(--border-hi);
+      transform: translateY(-5px);
+      box-shadow: 0 16px 48px rgba(0,0,0,.7);
+    }
+    .rc-img { position:relative; overflow:hidden; height: 190px; }
+    .rc-img img { width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease-out-quart); }
+    .review-card:hover .rc-img img { transform: scale(1.06); }
+    .rc-score {
+      position: absolute;
+      bottom: 12px; right: 12px;
+      background: rgba(6,7,9,.88);
+      border: 1px solid var(--border-hi);
+      padding: 8px 12px;
+      font-family: var(--fd);
+      font-weight: 900;
+      font-size: 26px;
+      line-height: 1;
+      backdrop-filter: blur(6px);
+    }
+    .rc-body { padding: 18px 20px 22px; }
+    .rc-tags { display:flex; align-items:center; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+    .rc-title {
+      font-family: var(--fd);
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--t1);
+      line-height: 1.05;
+      margin-bottom: 10px;
+      transition: color .15s;
+    }
+    .review-card:hover .rc-title { color: var(--gold); }
+    .rc-excerpt { font-size: 13px; color: var(--t2); line-height: 1.6; }
+    .rc-meta { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 10px; display:flex; align-items:center; justify-content:space-between; }
+
+    /* Full review article */
+    .review-article {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 0 60px;
+    }
+    .review-article h3 {
+      font-family: var(--fd);
+      font-size: 22px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--t1);
+      margin: 32px 0 12px;
+    }
+    .review-article p {
+      font-size: 15px;
+      color: var(--t2);
+      line-height: 1.8;
+      margin-bottom: 18px;
+    }
+    .verdict-box {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 4px 4px 0;
+      padding: 24px 28px;
+      margin: 32px 0;
+    }
+    .verdict-label { font-family: var(--fm); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .verdict-text { font-size: 14px; color: var(--t2); line-height: 1.7; font-style: italic; }
+
+    @media (max-width: 1024px) {
+      .reviews-grid { grid-template-columns: repeat(2,1fr); }
+      .review-feature { grid-template-columns: 1fr; }
+      .rf-img { height: 280px; }
+    }
+    @media (max-width: 640px) {
+      .reviews-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header scrolled">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></a>
+      <nav class="site-nav">
+        <a href="news.html">News</a>
+        <a href="reviews.html" class="active">Reviews</a>
+        <a href="previews.html">Previews</a>
+        <a href="videos.html">Videos</a>
+        <a href="deals.html">Deals</a>
+        <a href="guides.html">Guides</a>
+      </nav>
+      <div class="header-right">
+        <button class="btn-icon" aria-label="Search">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m19 19-3.8-3.8"/></svg>
+        </button>
+        <button class="btn-signin">Sign In</button>
+        <button class="btn-menu" id="menuBtn" aria-label="Menu" aria-expanded="false">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h14M3 12h14M3 18h14"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="news.html">News</a><a href="reviews.html" class="active">Reviews</a><a href="previews.html">Previews</a>
+  <a href="videos.html">Videos</a><a href="deals.html">Deals</a><a href="guides.html">Guides</a>
+</nav>
+
+<div class="ticker">
+  <div class="ticker-label">Breaking</div>
+  <div class="ticker-scroll">
+    <div class="ticker-track">
+      <span class="ticker-item">Clair Obscur: Expedition 33 wins Game of the Year at Summer Game Awards 2025</span>
+      <span class="ticker-item">Doom: The Dark Ages DLC "The Wrathful Deep" announced — arrives Sept 2025</span>
+      <span class="ticker-item">Monster Hunter Wilds breaks 15 million copies sold worldwide</span>
+      <span class="ticker-item">FromSoftware Nightreign enters final beta — full launch date September 2025</span>
+      <span class="ticker-item">Clair Obscur: Expedition 33 wins Game of the Year at Summer Game Awards 2025</span>
+      <span class="ticker-item">Doom: The Dark Ages DLC "The Wrathful Deep" announced — arrives Sept 2025</span>
+      <span class="ticker-item">Monster Hunter Wilds breaks 15 million copies sold worldwide</span>
+      <span class="ticker-item">FromSoftware Nightreign enters final beta — full launch date September 2025</span>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-top">
+  <div class="page-hero">
+    <div class="container">
+      <h1 class="page-hero-title">Reviews</h1>
+      <p class="page-hero-sub">Honest, considered verdicts on every major release — no embargoes broken, no scores inflated.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <button class="filter-btn active">All</button>
+      <button class="filter-btn">PS5</button>
+      <button class="filter-btn">Xbox</button>
+      <button class="filter-btn">PC</button>
+      <button class="filter-btn">Nintendo</button>
+      <button class="filter-btn">9+ Essential</button>
+      <button class="filter-btn">8+ Recommended</button>
+    </div>
+
+    <!-- Featured review -->
+    <div class="review-feature fade-up">
+      <div class="rf-body">
+        <div class="rf-tags">
+          <span class="tag t-review">Review</span>
+          <span class="tag t-excl">GOTY 2025</span>
+          <span class="plat">PS5 · Xbox Series · PC</span>
+        </div>
+        <h2 class="rf-title">Clair Obscur:<br>Expedition 33</h2>
+        <p class="rf-excerpt">
+          In a world where the Paintress writes a number each year — condemning everyone of that age to vanish — Sandfall Interactive has crafted one of the most devastating and mechanically brilliant RPGs in memory. A masterpiece from a debut studio.
+        </p>
+        <div class="rf-footer">
+          <div class="rf-author">By <strong>Priya Nair</strong> &nbsp;·&nbsp; Apr 24, 2025</div>
+          <a href="#review-clair" class="btn-outline">Read Full Review →</a>
+        </div>
+      </div>
+      <div class="rf-img">
+        <img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="Clair Obscur: Expedition 33" loading="lazy">
+        <div class="rf-score">
+          <div class="rf-score-label">Score</div>
+          <div class="score-n lg sc-green" data-score="9.6">9.6</div>
+          <div class="score-denom" style="font-size:10px; margin-top:4px;">/ 10</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews grid -->
+    <div class="sec-head">
+      <h2 class="sec-title">Recent Reviews</h2>
+    </div>
+
+    <div class="reviews-grid stagger">
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2835570/header.jpg" alt="Doom: The Dark Ages" loading="lazy">
+          <div class="rc-score sc-green" data-score="9.4">9.4</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="plat">PS5 · Xbox · PC</span></div>
+          <h3 class="rc-title">Doom: The Dark Ages</h3>
+          <p class="rc-excerpt">id Software reinvents the wheel for a third time. The Shield Saw parry system transforms defense into offence, and the Atlan mech sequences are an all-timer setpiece.</p>
+          <div class="rc-meta"><span>Marcus Webb · May 15, 2025</span></div>
+        </div>
+      </div>
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="Monster Hunter Wilds" loading="lazy">
+          <div class="rc-score sc-gold" data-score="9.2">9.2</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="plat">PS5 · Xbox · PC</span></div>
+          <h3 class="rc-title">Monster Hunter Wilds</h3>
+          <p class="rc-excerpt">Capcom's most ambitious Monster Hunter delivers the series' finest ecosystem, best roster, and most accessible yet deep combat. Arkveld is a hall-of-fame final boss.</p>
+          <div class="rc-meta"><span>Jin Park · Feb 28, 2025</span></div>
+        </div>
+      </div>
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2778580/header.jpg" alt="Elden Ring: Shadow of the Erdtree" loading="lazy">
+          <div class="rc-score sc-green" data-score="9.5">9.5</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="tag t-excl">Best DLC Ever</span></div>
+          <h3 class="rc-title">Elden Ring: Shadow of the Erdtree</h3>
+          <p class="rc-excerpt">40 hours of FromSoftware at absolute peak. The Land of Shadow is alien, suffocating, and extraordinary. Messmer the Impaler is the studio's greatest villain.</p>
+          <div class="rc-meta"><span>Marcus Webb · Jun 21, 2024</span></div>
+        </div>
+      </div>
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2683250/header.jpg" alt="Metaphor: ReFantazio" loading="lazy">
+          <div class="rc-score sc-gold" data-score="9.3">9.3</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="plat">PS5 · Xbox · PC</span></div>
+          <h3 class="rc-title">Metaphor: ReFantazio</h3>
+          <p class="rc-excerpt">Atlus has made their masterpiece. Politically sharp, mechanically refined, emotionally overwhelming — 14 hours of the finest final act in JRPG history.</p>
+          <div class="rc-meta"><span>Priya Nair · Oct 11, 2024</span></div>
+        </div>
+      </div>
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2358720/header.jpg" alt="Black Myth: Wukong" loading="lazy">
+          <div class="rc-score sc-gold" data-score="9.0">9.0</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="plat">PS5 · PC</span></div>
+          <h3 class="rc-title">Black Myth: Wukong</h3>
+          <p class="rc-excerpt">A visual triumph and deeper than anyone expected. The Transformation system creates a mechanical identity unlike anything FromSoftware ever made. A debut for the ages.</p>
+          <div class="rc-meta"><span>Lin Chen · Aug 20, 2024</span></div>
+        </div>
+      </div>
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/1145350/header.jpg" alt="Hades 2" loading="lazy">
+          <div class="rc-score sc-gold" data-score="9.1">9.1</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="plat">PC (EA)</span></div>
+          <h3 class="rc-title">Hades 2 Early Access</h3>
+          <p class="rc-excerpt">Supergiant do it again. Melinoë is a compelling heir, the Arcana card system adds genuine strategic depth, and the writing reaches levels of mythological texture the original only hinted at.</p>
+          <div class="rc-meta"><span>Priya Nair · May 6, 2024</span></div>
+        </div>
+      </div>
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2677660/header.jpg" alt="Indiana Jones" loading="lazy">
+          <div class="rc-score sc-ok" data-score="8.7">8.7</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="plat">Xbox · PC</span></div>
+          <h3 class="rc-title">Indiana Jones and the Great Circle</h3>
+          <p class="rc-excerpt">The most authentically Indiana Jones experience in any medium outside the films. MachineGames understood the character completely. The Vatican chapter alone is worth the price of entry.</p>
+          <div class="rc-meta"><span>Sam Torres · Dec 9, 2024</span></div>
+        </div>
+      </div>
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/2183900/header.jpg" alt="Space Marine 2" loading="lazy">
+          <div class="rc-score sc-ok" data-score="8.5">8.5</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="plat">PS5 · Xbox · PC</span></div>
+          <h3 class="rc-title">Warhammer 40K: Space Marine 2</h3>
+          <p class="rc-excerpt">The tyranid swarm opening is a spectacle no other action game this year matched. The Execute health loop creates addictive aggression-rewards-aggression momentum. Essential co-op.</p>
+          <div class="rc-meta"><span>Aiko Tanaka · Sep 9, 2024</span></div>
+        </div>
+      </div>
+
+      <div class="review-card fade-up">
+        <div class="rc-img">
+          <img src="https://cdn.akamai.steamstatic.com/steam/apps/1845910/header.jpg" alt="Dragon Age: The Veilguard" loading="lazy">
+          <div class="rc-score sc-ok" data-score="7.8">7.8</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-tags"><span class="tag t-review">Review</span><span class="plat">PS5 · Xbox · PC</span></div>
+          <h3 class="rc-title">Dragon Age: The Veilguard</h3>
+          <p class="rc-excerpt">BioWare's return lands with some of the studio's finest companion writing and a world that still has texture and specificity. The simplified combat and retconned lore hold it back from greatness.</p>
+          <div class="rc-meta"><span>Lin Chen · Oct 31, 2024</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Full written reviews -->
+    <div class="sec-head" style="margin-top: 48px;">
+      <h2 class="sec-title">In-Depth Reviews</h2>
+    </div>
+
+    <div id="review-clair" class="review-article fade-up">
+      <div class="rc-tags" style="margin-bottom:24px;">
+        <span class="tag t-review">Review</span>
+        <span class="tag t-excl">GOTY Contender</span>
+        <span class="plat">PS5 · Xbox Series · PC</span>
+        <span class="score" style="margin-left:8px;"><span class="score-n md sc-green" data-score="9.6">9.6</span><span class="score-denom" style="font-size:11px;">&thinsp;/ 10</span></span>
+      </div>
+      <h2 style="font-family:var(--fd);font-size:clamp(32px,5vw,60px);font-weight:900;text-transform:uppercase;color:var(--t1);line-height:.92;margin-bottom:16px;">Clair Obscur: <em style="color:var(--gold);font-style:normal;">Expedition 33</em></h2>
+      <p style="font-family:var(--fm);font-size:10px;color:var(--t3);margin-bottom:28px;letter-spacing:.05em;">By Priya Nair, Lead Critic &nbsp;·&nbsp; April 24, 2025</p>
+      <img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="Clair Obscur: Expedition 33" style="width:100%;border-radius:3px;margin-bottom:32px;aspect-ratio:16/7;object-fit:cover;" loading="lazy">
+
+      <p>In a world where the Paintress writes a number on her monolith each year — condemning everyone of that age to vanish in a flash of paint — Expedition 33 follows the last cohort old enough to march against her before they too are erased. It's one of the most devastating premises in modern gaming, and Sandfall Interactive executes it with the confidence of a studio three decades its senior.</p>
+
+      <p>The combat is a revelation. Borrowing FromSoftware's DNA for precision timing and routing it through a turn-based JRPG structure, every enemy encounter demands your full attention. Parrying, dodging, and landing input-perfect combos creates a rhythm that rewards mastery without punishing curiosity. The skill trees are deep without being overwhelming. Two dozen hours in, you're still discovering synergies.</p>
+
+      <h3>A World Worth Dying For</h3>
+      <p>The world of Lumière is achingly beautiful — a faded Belle Époque dream collapsing under grief and time. Sandfall's artists have created environments that feel genuinely hand-authored rather than procedurally sprawling: every vista has been composed, every ruin tells a story. The soundtrack by Lorien Testard and Yale Miller is among the finest in any game this generation.</p>
+
+      <p>What elevates Expedition 33 beyond its mechanical excellence is the writing. Gustave, Maelle, Lune, and Verso are real people making impossible choices, and the game never lets you forget what's at stake. The relationship dynamics evolve naturally rather than through companionship meters. I paused the game twice just to absorb what had happened — not from confusion, but from the specific weight of grief the game had just handed me.</p>
+
+      <div class="verdict-box">
+        <div class="verdict-label">The Verdict</div>
+        <div class="verdict-text">Clair Obscur: Expedition 33 is Sandfall Interactive's first game and, immediately, one of the finest RPGs ever made. It is emotionally devastating, mechanically brilliant, and built with an artistic ambition that most developers spend careers approaching. Play it.</div>
+      </div>
+
+      <p style="font-size:13px;color:var(--t3);font-family:var(--fm);">Reviewed on PS5. Code provided by Focus Entertainment. 58 hours played to full completion.</p>
+    </div>
+
+    <!-- Doom review -->
+    <div style="border-top: 1px solid var(--border); padding-top: 48px;" class="review-article fade-up">
+      <div class="rc-tags" style="margin-bottom:24px;">
+        <span class="tag t-review">Review</span>
+        <span class="plat">PS5 · Xbox Series · PC</span>
+        <span class="score" style="margin-left:8px;"><span class="score-n md sc-green" data-score="9.4">9.4</span><span class="score-denom" style="font-size:11px;">&thinsp;/ 10</span></span>
+      </div>
+      <h2 style="font-family:var(--fd);font-size:clamp(32px,5vw,60px);font-weight:900;text-transform:uppercase;color:var(--t1);line-height:.92;margin-bottom:16px;">Doom: <em style="color:var(--gold);font-style:normal;">The Dark Ages</em></h2>
+      <p style="font-family:var(--fm);font-size:10px;color:var(--t3);margin-bottom:28px;letter-spacing:.05em;">By Marcus Webb, Senior Editor &nbsp;·&nbsp; May 15, 2025</p>
+      <img src="https://cdn.akamai.steamstatic.com/steam/apps/2835570/header.jpg" alt="Doom: The Dark Ages" style="width:100%;border-radius:3px;margin-bottom:32px;aspect-ratio:16/7;object-fit:cover;" loading="lazy">
+
+      <p>id Software set an impossibly high bar with Doom Eternal. The Dark Ages exceeds it not by going faster, but by going deeper. The medieval-era pivot is immediately arresting — a world of grotesque flesh-cathedrals and cosmic horror rather than the sci-fi corridors we've spent four games learning to sprint through.</p>
+
+      <p>The Shield Saw mechanic alone represents a leap in first-person combat design. Blocking is now offensive: a perfectly timed parry sends projectiles back and staggers heavy enemies, while the sword lunge closes distance in ways that reward players who treat every arena as a positioning puzzle. The Slayer is slower here, and that's entirely intentional — Dark Ages asks you to think before you move, and the result is combat that feels both tactical and brutally physical.</p>
+
+      <h3>Scale That Actually Delivers</h3>
+      <p>The Atlan mech sequences have no right to be as good as they are. When you pilot the colossal mechanical titan through burning demonic armies — intercepting missiles with your fist, cleaving skyscraper-scale demons at the ankle — the shift in perspective is staggering. Many games promise epic scale and deliver a cutscene. id delivers playable spectacle.</p>
+
+      <div class="verdict-box">
+        <div class="verdict-label">The Verdict</div>
+        <div class="verdict-text">Doom: The Dark Ages proves one of gaming's oldest franchises still has genuinely new ideas. The Shield Saw parry system is the most creative combat mechanic in years, and the mech sequences are an all-timer. A must-play.</div>
+      </div>
+    </div>
+
+    <!-- Elden Ring review -->
+    <div style="border-top: 1px solid var(--border); padding-top: 48px;" class="review-article fade-up">
+      <div class="rc-tags" style="margin-bottom:24px;">
+        <span class="tag t-review">Review</span>
+        <span class="tag t-excl">Best DLC Ever Made</span>
+        <span class="score" style="margin-left:8px;"><span class="score-n md sc-green" data-score="9.5">9.5</span><span class="score-denom" style="font-size:11px;">&thinsp;/ 10</span></span>
+      </div>
+      <h2 style="font-family:var(--fd);font-size:clamp(32px,5vw,60px);font-weight:900;text-transform:uppercase;color:var(--t1);line-height:.92;margin-bottom:16px;">Elden Ring: <em style="color:var(--gold);font-style:normal;">Shadow of the Erdtree</em></h2>
+      <p style="font-family:var(--fm);font-size:10px;color:var(--t3);margin-bottom:28px;letter-spacing:.05em;">By Marcus Webb, Senior Editor &nbsp;·&nbsp; June 21, 2024</p>
+      <img src="https://cdn.akamai.steamstatic.com/steam/apps/2778580/header.jpg" alt="Elden Ring Shadow of the Erdtree" style="width:100%;border-radius:3px;margin-bottom:32px;aspect-ratio:16/7;object-fit:cover;" loading="lazy">
+
+      <p>Shadow of the Erdtree doesn't expand Elden Ring — it completes it. FromSoftware's DLC is 40 hours of the most densely designed content the studio has ever produced, and that is a sentence I never expected to write about an expansion.</p>
+
+      <p>The Land of Shadow is a mirror of the Lands Between — familiar in structure but alien in tone. Where the base game felt like a shattered, sun-bleached world in slow descent, the Shadow feels suffocated, overgrown with something ancient and wrong. Every zone carries a specific sense of dread. The Scadutree fragments that power the new progression system are scattered across the world with the same environmental storytelling mastery FromSoftware has refined over a decade.</p>
+
+      <h3>Messmer and the Art of the Boss Fight</h3>
+      <p>The Messmer the Impaler storyline is among FromSoftware's most emotionally coherent narratives, with an ending that reframes everything you thought you understood about the Elden Ring world. His boss encounter is the studio's greatest: perfectly telegraphed, learnable, devastating, and narratively resonant.</p>
+
+      <div class="verdict-box">
+        <div class="verdict-label">The Verdict</div>
+        <div class="verdict-text">Shadow of the Erdtree is the best DLC ever made. Not the best FromSoftware DLC — the best expansion in the history of the medium. If you played Elden Ring, you are obligated to play this.</div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></div>
+        <p class="footer-tagline">The pulse of gaming — news, reviews, and culture, unfiltered.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-head">Coverage</div>
+          <a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a><a href="videos.html">Videos</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-head">Platforms</div>
+          <a href="#">PlayStation</a><a href="#">Xbox</a><a href="#">Nintendo</a><a href="#">PC</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-head">Company</div>
+          <a href="#">About</a><a href="#">Editorial Policy</a><a href="#">Careers</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-head">Follow</div>
+          <a href="#">Twitter / X</a><a href="#">YouTube</a><a href="#">Discord</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 <span class="accent">LOADOUT.GG</span>. All rights reserved.</div>
+      <div class="footer-copy">Privacy Policy &nbsp;·&nbsp; Terms of Use</div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

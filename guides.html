@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guides — LOADOUT.GG</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-hero { background: var(--bg-1); border-bottom: 1px solid var(--border); padding: 48px 0 36px; }
+    .page-hero-title { font-family: var(--fd); font-size: clamp(42px,6vw,72px); font-weight: 900; text-transform: uppercase; color: var(--t1); letter-spacing: -1px; }
+    .page-hero-sub { font-size: 14px; color: var(--t2); margin-top: 8px; }
+
+    .guides-layout { display: grid; grid-template-columns: 1fr 280px; gap: 48px; align-items: start; padding: 48px 0 80px; }
+    @media (max-width: 960px) { .guides-layout { grid-template-columns: 1fr; } }
+
+    /* Guide cards */
+    .guide-card {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 0;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color .2s, transform .25s var(--ease-out-quart), box-shadow .25s;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .guide-card:hover { border-color: var(--border-hi); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,.6); }
+    .gc-img { overflow: hidden; }
+    .gc-img img { width:100%; height:100%; object-fit:cover; transition: transform .5s var(--ease-out-quart); display: block; }
+    .guide-card:hover .gc-img img { transform: scale(1.07); }
+    .gc-body { padding: 20px 24px; display: flex; flex-direction: column; justify-content: space-between; }
+    .gc-tags { display:flex; gap:6px; margin-bottom:10px; }
+    .gc-title { font-family: var(--fd); font-size: 19px; font-weight: 800; text-transform: uppercase; color: var(--t1); line-height: 1.1; transition: color .15s; }
+    .guide-card:hover .gc-title { color: var(--gold); }
+    .gc-desc { font-family: var(--fm); font-size: 13px; color: var(--t3); line-height: 1.6; margin-top: 8px; }
+    .gc-meta { font-family: var(--fm); font-size: 10px; color: var(--t4); margin-top: 12px; text-transform: uppercase; letter-spacing: .06em; }
+
+    @media (max-width: 640px) { .guide-card { grid-template-columns: 1fr; } }
+
+    /* Featured guide */
+    .guide-featured {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      margin-bottom: 40px;
+      transition: border-color .2s;
+    }
+    .guide-featured:hover { border-color: var(--border-hi); }
+    .gf-thumb { aspect-ratio: 16/7; overflow: hidden; position: relative; }
+    .gf-thumb img { width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease-out-quart); }
+    .guide-featured:hover .gf-thumb img { transform: scale(1.03); }
+    .gf-thumb::after { content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(6,7,9,.95) 0%, rgba(6,7,9,.2) 55%, transparent 100%); }
+    .gf-info { position:absolute; bottom:0; left:0; right:0; padding:28px 32px; }
+    .gf-tags { display:flex; gap:8px; margin-bottom:10px; }
+    .gf-title { font-family: var(--fd); font-size: clamp(22px,3vw,36px); font-weight: 900; text-transform: uppercase; color: var(--t1); line-height: 1.0; }
+    .gf-desc { font-family: var(--fm); font-size: 13px; color: var(--t2); margin-top: 8px; max-width: 560px; line-height: 1.6; }
+    .gf-meta { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 10px; }
+
+    /* Difficulty pip */
+    .difficulty { display: flex; align-items: center; gap: 6px; }
+    .difficulty-label { font-family: var(--fm); font-size: 10px; color: var(--t3); text-transform: uppercase; letter-spacing: .06em; }
+    .pips { display: flex; gap: 3px; }
+    .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+    .pip.on { background: var(--gold); }
+
+    /* Sidebar */
+    .guides-sidebar {}
+    .sidebar-game-box { background: var(--bg-1); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 16px; cursor: pointer; transition: border-color .2s; }
+    .sidebar-game-box:hover { border-color: var(--border-hi); }
+    .sgb-thumb { aspect-ratio: 16/6; overflow: hidden; }
+    .sgb-thumb img { width:100%;height:100%;object-fit:cover; transition: transform .4s var(--ease-out-quart); }
+    .sidebar-game-box:hover .sgb-thumb img { transform: scale(1.06); }
+    .sgb-body { padding: 12px 14px; }
+    .sgb-title { font-family: var(--fd); font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--t1); }
+    .sgb-count { font-family: var(--fm); font-size: 10px; color: var(--t3); margin-top: 3px; }
+
+    .sidebar-box { background: var(--bg-1); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 16px; }
+    .sidebar-box-title { font-family: var(--fd); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--t3); margin-bottom: 14px; }
+    .tip-row { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .tip-row:last-child { border-bottom: none; }
+    .tip-game { font-family: var(--fm); font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+    .tip-text { font-family: var(--fm); font-size: 12px; color: var(--t2); line-height: 1.5; }
+
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .filter-btn { font-family: var(--fm); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 7px 14px; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--t3); cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(240,165,0,.08); }
+  </style>
+</head>
+<body>
+
+<header class="site-header scrolled">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></a>
+      <nav class="site-nav">
+        <a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a>
+        <a href="videos.html">Videos</a><a href="deals.html">Deals</a><a href="guides.html" class="active">Guides</a>
+      </nav>
+      <div class="header-right">
+        <button class="btn-icon" aria-label="Search"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m19 19-3.8-3.8"/></svg></button>
+        <button class="btn-signin">Sign In</button>
+        <button class="btn-menu" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h14M3 12h14M3 18h14"/></svg></button>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="previews.html">Previews</a>
+  <a href="videos.html">Videos</a><a href="deals.html">Deals</a><a href="guides.html" class="active">Guides</a>
+</nav>
+<div class="ticker">
+  <div class="ticker-label">Guides</div>
+  <div class="ticker-scroll"><div class="ticker-track">
+    <span class="ticker-item">GUIDE: Clair Obscur — How to unlock all secret bosses</span>
+    <span class="ticker-item">GUIDE: Monster Hunter Wilds TU2 — New monster weaknesses & best builds</span>
+    <span class="ticker-item">GUIDE: Doom Dark Ages — All Slayer Keys locations</span>
+    <span class="ticker-item">GUIDE: Clair Obscur — How to unlock all secret bosses</span>
+    <span class="ticker-item">GUIDE: Monster Hunter Wilds TU2 — New monster weaknesses & best builds</span>
+    <span class="ticker-item">GUIDE: Doom Dark Ages — All Slayer Keys locations</span>
+  </div></div>
+</div>
+
+<div class="page-top">
+  <div class="page-hero">
+    <div class="container">
+      <h1 class="page-hero-title">Guides</h1>
+      <p class="page-hero-sub">Walkthroughs, builds, tips, and everything you need to win.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="guides-layout">
+      <div>
+        <!-- Featured -->
+        <div class="guide-featured fade-up">
+          <div class="gf-thumb">
+            <img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="Clair Obscur" loading="lazy">
+            <div class="gf-info">
+              <div class="gf-tags">
+                <span class="tag t-excl">Complete Guide</span>
+                <span class="tag t-video">Updated</span>
+              </div>
+              <div class="gf-title">Clair Obscur: Expedition 33 — Full Walkthrough & All Secrets</div>
+              <div class="gf-desc">Every chapter, every boss, every hidden Pictos ability, and the choices that lock you out of the true ending. Fully spoiler-tagged so you can go as deep as you want.</div>
+              <div class="gf-meta">Priya Nair &nbsp;·&nbsp; Jun 20, 2025 &nbsp;·&nbsp; 14 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="filter-bar">
+          <button class="filter-btn active">All</button>
+          <button class="filter-btn">Walkthrough</button>
+          <button class="filter-btn">Builds</button>
+          <button class="filter-btn">Tips &amp; Tricks</button>
+          <button class="filter-btn">Boss Guides</button>
+          <button class="filter-btn">Collectibles</button>
+        </div>
+
+        <div class="sec-head"><h2 class="sec-title">Latest Guides</h2></div>
+
+        <div class="guide-card fade-up">
+          <div class="gc-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2835570/header.jpg" alt="Doom Dark Ages" loading="lazy"></div>
+          <div class="gc-body">
+            <div>
+              <div class="gc-tags"><span class="tag t-hot">Boss Guide</span></div>
+              <div class="gc-title">Doom Dark Ages — How to Beat the Dreadnaught on Nightmare</div>
+              <div class="gc-desc">The Dreadnaught is the hardest fight in the game. Here's the exact pattern, the window to parry, and the weapon combo that shreds its second phase in under 90 seconds.</div>
+            </div>
+            <div>
+              <div class="difficulty"><span class="difficulty-label">Difficulty</span><div class="pips"><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div></div></div>
+              <div class="gc-meta">Marcus Webb · May 18, 2025 · 6 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card fade-up">
+          <div class="gc-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="Monster Hunter Wilds" loading="lazy"></div>
+          <div class="gc-body">
+            <div>
+              <div class="gc-tags"><span class="tag t-preview">Build Guide</span></div>
+              <div class="gc-title">Monster Hunter Wilds TU2 — Best Insect Glaive Build for Tempered Arkveld</div>
+              <div class="gc-desc">Title Update 2 shook the meta. This Insect Glaive build uses the new Arkveld chassis with Coalescence 3 + Resentment to hit consistent 60-second kills on the hardest variant.</div>
+            </div>
+            <div>
+              <div class="difficulty"><span class="difficulty-label">Difficulty</span><div class="pips"><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div></div></div>
+              <div class="gc-meta">Jin Park · Jun 12, 2025 · 8 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card fade-up">
+          <div class="gc-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="Clair Obscur" loading="lazy"></div>
+          <div class="gc-body">
+            <div>
+              <div class="gc-tags"><span class="tag t-review">Build Guide</span></div>
+              <div class="gc-title">Clair Obscur — Best Hard Mode Build for Every Character</div>
+              <div class="gc-desc">Hard mode punishes passive healing and forces you to parry. These builds lean into the perfect-dodge window, stack Momentum, and clear Act 3 without grinding a single extra level.</div>
+            </div>
+            <div>
+              <div class="difficulty"><span class="difficulty-label">Difficulty</span><div class="pips"><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div></div></div>
+              <div class="gc-meta">Priya Nair · Jun 21, 2025 · 11 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card fade-up">
+          <div class="gc-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2683250/header.jpg" alt="Metaphor" loading="lazy"></div>
+          <div class="gc-body">
+            <div>
+              <div class="gc-tags"><span class="tag t-news">Collectibles</span></div>
+              <div class="gc-title">Metaphor: ReFantazio — All Follower Bonds & How to Max Them Fast</div>
+              <div class="gc-desc">There are 22 Follower bonds, and you can only max around 14 in a single playthrough without careful scheduling. This route maps the optimal order for the most impactful abilities.</div>
+            </div>
+            <div>
+              <div class="difficulty"><span class="difficulty-label">Difficulty</span><div class="pips"><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div></div>
+              <div class="gc-meta">Lin Chen · Nov 6, 2024 · 9 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card fade-up">
+          <div class="gc-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2778580/header.jpg" alt="Elden Ring DLC" loading="lazy"></div>
+          <div class="gc-body">
+            <div>
+              <div class="gc-tags"><span class="tag t-hot">Boss Guide</span></div>
+              <div class="gc-title">Shadow of the Erdtree — Messmer the Impaler, All Phases Explained</div>
+              <div class="gc-desc">Messmer's second phase catches everyone off guard. Here's every window, the stance-break threshold, and why Boluses are mandatory if you're not a bleed build.</div>
+            </div>
+            <div>
+              <div class="difficulty"><span class="difficulty-label">Difficulty</span><div class="pips"><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div></div></div>
+              <div class="gc-meta">Marcus Webb · Jul 5, 2024 · 7 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card fade-up">
+          <div class="gc-img"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2358720/header.jpg" alt="Black Myth Wukong" loading="lazy"></div>
+          <div class="gc-body">
+            <div>
+              <div class="gc-tags"><span class="tag t-video">Tips &amp; Tricks</span></div>
+              <div class="gc-title">Black Myth: Wukong — 12 Things the Game Doesn't Tell You</div>
+              <div class="gc-desc">Vessel transformation durations, the hidden shrine behind the waterfall in Chapter 2, and why you should never spend Will on the first skill tree. Twelve things that change how you play.</div>
+            </div>
+            <div>
+              <div class="difficulty"><span class="difficulty-label">Difficulty</span><div class="pips"><div class="pip on"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div></div>
+              <div class="gc-meta">Lin Chen · Aug 30, 2024 · 5 min read</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="guides-sidebar">
+        <div class="sidebar-box-title" style="font-family:var(--fd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:14px;">Browse by Game</div>
+
+        <div class="sidebar-game-box">
+          <div class="sgb-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2805446/header.jpg" alt="" loading="lazy"></div>
+          <div class="sgb-body">
+            <div class="sgb-title">Clair Obscur: Expedition 33</div>
+            <div class="sgb-count">14 guides</div>
+          </div>
+        </div>
+        <div class="sidebar-game-box">
+          <div class="sgb-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2835570/header.jpg" alt="" loading="lazy"></div>
+          <div class="sgb-body">
+            <div class="sgb-title">Doom: The Dark Ages</div>
+            <div class="sgb-count">9 guides</div>
+          </div>
+        </div>
+        <div class="sidebar-game-box">
+          <div class="sgb-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg" alt="" loading="lazy"></div>
+          <div class="sgb-body">
+            <div class="sgb-title">Monster Hunter Wilds</div>
+            <div class="sgb-count">22 guides</div>
+          </div>
+        </div>
+        <div class="sidebar-game-box">
+          <div class="sgb-thumb"><img src="https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg" alt="" loading="lazy"></div>
+          <div class="sgb-body">
+            <div class="sgb-title">Elden Ring</div>
+            <div class="sgb-count">31 guides</div>
+          </div>
+        </div>
+
+        <div class="sidebar-box" style="margin-top:20px;">
+          <div class="sidebar-box-title">Quick Tips</div>
+          <div class="tip-row">
+            <div class="tip-game">Clair Obscur</div>
+            <div class="tip-text">You can parry any attack with a blue flash — even ones that look unblockable.</div>
+          </div>
+          <div class="tip-row">
+            <div class="tip-game">Doom Dark Ages</div>
+            <div class="tip-text">The shield parry recharges your flail — spam the cycle for infinite ammo on elites.</div>
+          </div>
+          <div class="tip-row">
+            <div class="tip-game">MH Wilds</div>
+            <div class="tip-text">Focus Mode aim snaps to wound locations — always wound first on Arkveld.</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">LOAD<span class="dot">·</span>OUT<span class="gg">.GG</span></div>
+        <p class="footer-tagline">The pulse of gaming — news, reviews, and culture, unfiltered.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><div class="footer-col-head">Coverage</div><a href="news.html">News</a><a href="reviews.html">Reviews</a><a href="videos.html">Videos</a></div>
+        <div class="footer-col"><div class="footer-col-head">Platforms</div><a href="#">PlayStation</a><a href="#">Xbox</a><a href="#">PC</a></div>
+        <div class="footer-col"><div class="footer-col-head">Company</div><a href="#">About</a><a href="#">Careers</a></div>
+        <div class="footer-col"><div class="footer-col-head">Follow</div><a href="#">YouTube</a><a href="#">Twitter</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 <span class="accent">LOADOUT.GG</span>. All rights reserved.</div>
+      <div class="footer-copy">Privacy &nbsp;·&nbsp; Terms</div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

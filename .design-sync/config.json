@@ -1,0 +1,39 @@
+{
+  "pkg": "aegis-app",
+  "globalName": "Aegis",
+  "shape": "package",
+  "srcDir": "src/components",
+  "tsconfig": "tsconfig.json",
+  "cssEntry": "src/styles/index.css",
+  "componentSrcMap": {
+    "Button": "src/components/ui.tsx",
+    "Card": "src/components/ui.tsx",
+    "Chip": "src/components/ui.tsx",
+    "Modal": "src/components/ui.tsx",
+    "Field": "src/components/ui.tsx",
+    "TextInput": "src/components/ui.tsx",
+    "TextArea": "src/components/ui.tsx",
+    "Select": "src/components/ui.tsx",
+    "Loading": "src/components/ui.tsx",
+    "ErrorNote": "src/components/ui.tsx",
+    "Empty": "src/components/ui.tsx",
+    "HBar": "src/components/charts.tsx",
+    "Spark": "src/components/charts.tsx",
+    "Layout": null,
+    "CarePlanModal": null
+  },
+  "guidelinesGlob": [],
+  "overrides": {
+    "Modal": {
+      "cardMode": "single",
+      "viewport": "560x520"
+    },
+    "HBar": {
+      "cardMode": "column"
+    }
+  },
+  "extraFonts": [
+    "src/styles/fonts/ds-fonts.css"
+  ],
+  "readmeHeader": ".design-sync/conventions.md"
+}

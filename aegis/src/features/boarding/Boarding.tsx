@@ -5,9 +5,10 @@ import { useAuth } from '../../auth/AuthProvider';
 import CarePlanModal from '../../components/CarePlanModal';
 import { Button, Empty, ErrorNote, Loading } from '../../components/ui';
 import { downloadCsv, toCsv } from '../../lib/csv';
+import { initials } from '../../lib/format';
 import { fmtTime, todayISO } from '../../lib/status';
 import type { Boarding as BoardingRow, Child, Run } from '../../lib/types';
-import { enqueueBoarding, flushOutbox, onOutboxChange, pendingKeys } from './outbox';
+import { enqueueBoarding, flushOutbox, onOutboxChange, pendingKeys, pendingWrites } from './outbox';
 
 export default function Boarding() {
   const { profile } = useAuth();
@@ -52,6 +53,24 @@ export default function Boarding() {
 
   const run = allRuns.find((r) => r.id === active) ?? allRuns[0]!;
   const byChild = new Map((boardings.data ?? []).map((b) => [b.childId, b]));
+  // Overlay queued offline taps so the register reflects them immediately —
+  // otherwise a PA in a dead spot could never advance a child to "dropped".
+  for (const w of pendingWrites()) {
+    if (w.serviceDate !== serviceDate) continue;
+    byChild.set(w.childId, {
+      id: `pending:${w.childId}`,
+      runId: w.runId,
+      childId: w.childId,
+      serviceDate: w.serviceDate,
+      state: w.state,
+      boardedAt: w.boardedAt ?? null,
+      boardedLoc: w.boardedLoc ?? null,
+      droppedAt: w.droppedAt ?? null,
+      droppedLoc: w.droppedLoc ?? null,
+      recordedBy: null,
+      pending: true,
+    });
+  }
   const on = run.children.filter((c) => {
     const b = byChild.get(c.id);
     return b && b.state !== 'waiting';
@@ -90,8 +109,8 @@ export default function Boarding() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not record the boarding.');
     }
+    // Boardings/pending refresh via the outbox subscription; updates feed here.
     setPending(pendingKeys());
-    void qc.invalidateQueries({ queryKey: ['boardings'] });
     void qc.invalidateQueries({ queryKey: ['parentUpdates'] });
   }
 
@@ -248,10 +267,7 @@ function ChildRow({
   return (
     <div className="child">
       <div className="avatar" aria-hidden="true">
-        {child.displayName
-          .split(' ')
-          .map((x) => x[0])
-          .join('')}
+        {initials(child.displayName)}
       </div>
       <div className="child-info">
         <div className="child-name">{child.displayName}</div>

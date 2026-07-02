@@ -46,9 +46,13 @@ describe('compliance records', () => {
     expect(await demoApi.listStaffWithCredentials()).toEqual([]);
     expect(await demoApi.listVehiclesWithChecks()).toEqual([]);
   });
-  it('PA cannot read vehicle checks', async () => {
-    as('p-pa');
-    expect(await demoApi.listVehiclesWithChecks()).toEqual([]);
+  it('crew see only their own run\'s vehicle; manager sees the fleet', async () => {
+    as('p-manager');
+    expect((await demoApi.listVehiclesWithChecks()).length).toBe(2);
+    as('p-driver'); // Darren drives BV21 PHX on run c1
+    expect((await demoApi.listVehiclesWithChecks()).map((v) => v.reg)).toEqual(['BV21 PHX']);
+    as('p-pa'); // Maria is the PA on the same vehicle
+    expect((await demoApi.listVehiclesWithChecks()).map((v) => v.reg)).toEqual(['BV21 PHX']);
   });
 });
 
@@ -89,6 +93,22 @@ describe('child PII — the address split', () => {
   it('manager sees PII', async () => {
     as('p-manager');
     expect((await demoApi.getChildPII('d1'))?.fullName).toBe('Jamie Booth');
+  });
+  it('batched PII respects the same rules (driver own run, PA nothing)', async () => {
+    as('p-driver');
+    const mine = await demoApi.listChildrenPII(['d1', 'd2', 'd4']); // d4 is on the other run
+    expect(mine.map((r) => r.childId).sort()).toEqual(['d1', 'd2']);
+    as('p-pa');
+    expect(await demoApi.listChildrenPII(['d1', 'd2'])).toEqual([]);
+  });
+  it('reading a home address is written to the audit log', async () => {
+    as('p-driver');
+    await demoApi.getChildPII('d1');
+    as('p-manager');
+    const { rows } = await demoApi.listAudit(0, 10);
+    expect(
+      rows.some((r) => r.action.includes('name & address') && r.actorName === 'Darren Whitlock'),
+    ).toBe(true);
   });
 });
 

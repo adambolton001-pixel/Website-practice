@@ -99,6 +99,8 @@ export interface AegisApi {
   saveBoarding(write: BoardingWrite): Promise<Boarding>;
   getCarePlan(childId: string): Promise<CarePlan | null>;
   getChildPII(childId: string): Promise<ChildPII | null>;
+  /** batched PII fetch (one request for a whole run sheet); same access rules */
+  listChildrenPII(childIds: string[]): Promise<ChildPII[]>;
 
   // -- incidents ---------------------------------------------------------
   listIncidents(): Promise<Incident[]>;

@@ -1,5 +1,6 @@
 import { api } from '../../api';
 import type { BoardingWrite } from '../../api/contract';
+import { PermissionError } from '../../lib/errors';
 
 // Offline-first boarding writes: every tap lands in a localStorage outbox
 // first, then flushes to the backend. If the vehicle is in a dead spot the
@@ -22,6 +23,10 @@ function writeQueue(q: QueueItem[]): void {
   localStorage.setItem(KEY, JSON.stringify(q));
 }
 
+function dequeue(childId: string, serviceDate: string): void {
+  writeQueue(readQueue().filter((i) => !(i.childId === childId && i.serviceDate === serviceDate)));
+}
+
 const listeners = new Set<() => void>();
 function notify() {
   listeners.forEach((cb) => cb());
@@ -39,6 +44,14 @@ export function pendingKeys(): Set<string> {
   return new Set(readQueue().map((i) => `${i.childId}:${i.serviceDate}`));
 }
 
+/**
+ * The queued writes themselves — the register overlays these on server state
+ * so an offline PA still sees taps take effect (and can go on → dropped).
+ */
+export function pendingWrites(): BoardingWrite[] {
+  return readQueue();
+}
+
 /** Queue a boarding write and try to flush immediately. */
 export async function enqueueBoarding(write: BoardingWrite): Promise<void> {
   const q = readQueue().filter(
@@ -52,42 +65,44 @@ export async function enqueueBoarding(write: BoardingWrite): Promise<void> {
 
 let flushing = false;
 
-/** Push queued writes to the backend; leaves failures queued for retry. */
+/**
+ * Push queued writes to the backend. Transient failures stay queued for
+ * retry but never block the rest of the queue; a PermissionError will never
+ * succeed, so that item is dropped and the error surfaced to the caller.
+ */
 export async function flushOutbox(): Promise<void> {
   if (flushing) return;
   flushing = true;
+  let changed = false;
+  let denied: PermissionError | null = null;
   try {
-    let q = readQueue();
-    for (const item of [...q]) {
+    for (const item of readQueue()) {
       if (typeof navigator !== 'undefined' && !navigator.onLine) break;
       try {
         await api().saveBoarding(item);
-        q = readQueue().filter(
-          (i) => !(i.childId === item.childId && i.serviceDate === item.serviceDate),
-        );
-        writeQueue(q);
-        notify();
+        dequeue(item.childId, item.serviceDate);
+        changed = true;
       } catch (err) {
-        // Permission errors will never succeed — drop; network errors retry.
-        if (err instanceof Error && /permission|policy/i.test(err.message)) {
-          q = readQueue().filter(
-            (i) => !(i.childId === item.childId && i.serviceDate === item.serviceDate),
-          );
-          writeQueue(q);
-          notify();
-          throw err;
+        if (err instanceof PermissionError) {
+          dequeue(item.childId, item.serviceDate);
+          changed = true;
+          denied = err;
         }
-        break; // keep queued, retry on next flush
+        // transient failure: keep the item queued, carry on with the others
       }
     }
   } finally {
     flushing = false;
+    if (changed) notify();
   }
+  if (denied) throw denied;
 }
 
 // Re-flush whenever the connection comes back.
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
-    void flushOutbox();
+    void flushOutbox().catch(() => {
+      /* surfaced on the next user action */
+    });
   });
 }

@@ -5,6 +5,7 @@ import { backendMode } from '../../lib/config';
 import { api } from '../../api';
 import { resetDemoData } from '../../api/demo/store';
 import { ROLE_LABEL } from '../../components/Layout';
+import { initials } from '../../lib/format';
 import type { Profile } from '../../lib/types';
 
 export default function Login() {
@@ -75,10 +76,7 @@ export default function Login() {
             {personas.map((p) => (
               <button key={p.id} className="persona" onClick={() => void pick(p.id)} disabled={busy}>
                 <span className="avatar" aria-hidden="true">
-                  {p.fullName
-                    .split(' ')
-                    .map((x) => x[0])
-                    .join('')}
+                  {initials(p.fullName)}
                 </span>
                 <span>
                   <span className="persona-name">{p.fullName}</span>

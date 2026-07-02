@@ -26,16 +26,16 @@ import type {
   UpdateKind,
   Vehicle,
 } from '../../lib/types';
-import { getData, getSessionUserId, mutate, setSessionUserId, uid } from './store';
+import { PermissionError } from '../../lib/errors';
+import type { DemoData } from './seed';
+import { getData, getFile, getSessionUserId, mutate, saveFile, setSessionUserId, uid } from './store';
 
 // ---------------------------------------------------------------------------
 // The demo backend enforces the SAME access matrix as the RLS policies in
 // aegis-backend-schema.sql. Reads a role isn't entitled to return empty/null
-// (like RLS row filtering); writes a role isn't entitled to throw (like a
-// policy violation). The UI never does the gating itself.
+// (like RLS row filtering); writes a role isn't entitled to throw a
+// PermissionError (like a policy violation). The UI never does the gating.
 // ---------------------------------------------------------------------------
-
-const DENIED = 'Your role does not have permission to do that (blocked by access policy).';
 
 const listeners = new Set<(userId: string | null) => void>();
 
@@ -58,18 +58,30 @@ function myRunIds(p: Profile): string[] {
     .map((r) => r.id);
 }
 
-function appendAudit(p: Profile, action: string, entity: string | null = null): void {
-  mutate((d) => {
-    const nextId = d.auditLog.reduce((m, e) => Math.max(m, Number(e.id)), 0) + 1;
-    d.auditLog.push({
-      id: nextId,
-      actorRole: p.role,
-      actorName: p.fullName,
-      action,
-      entity,
-      createdAt: new Date().toISOString(),
-    });
+/** Vehicles on the caller's assigned runs (matrix: crew see own vehicle only). */
+function myVehicleIds(p: Profile): string[] {
+  if (!p.staffId) return [];
+  return getData()
+    .runs.filter((r) => r.driverStaffId === p.staffId || r.paStaffId === p.staffId)
+    .map((r) => r.vehicleId)
+    .filter((v): v is string => Boolean(v));
+}
+
+// Internal writers take the store so several can share ONE mutate/persist.
+function appendAuditIn(d: DemoData, p: Profile, action: string, entity: string | null = null): void {
+  const nextId = d.auditLog.reduce((m, e) => Math.max(m, Number(e.id)), 0) + 1;
+  d.auditLog.push({
+    id: nextId,
+    actorRole: p.role,
+    actorName: p.fullName,
+    action,
+    entity,
+    createdAt: new Date().toISOString(),
   });
+}
+
+function appendAudit(p: Profile, action: string, entity: string | null = null): void {
+  mutate((d) => appendAuditIn(d, p, action, entity));
 }
 
 function childName(childId: string): string {
@@ -78,8 +90,13 @@ function childName(childId: string): string {
 
 // Automatic parent notification — in production this runs in the `notify`
 // Edge Function with the service role (so a PA never reads contact PII).
-function dispatchParentUpdate(actor: Profile, childId: string, runId: string, kind: UpdateKind): void {
-  const d = getData();
+function dispatchParentUpdateIn(
+  d: DemoData,
+  actor: Profile,
+  childId: string,
+  runId: string,
+  kind: UpdateKind,
+): void {
   const child = d.children.find((c) => c.id === childId);
   const run = d.runs.find((r) => r.id === runId);
   if (!child || !run) return;
@@ -99,17 +116,15 @@ function dispatchParentUpdate(actor: Profile, childId: string, runId: string, ki
       : kind === 'arrived'
         ? `${child.displayName} has arrived safely at ${run.school ?? 'school'}.`
         : `The bus is about 5 minutes away from picking up ${child.displayName}.`;
-  mutate((data) => {
-    data.parentUpdates.push({
-      id: uid(),
-      childId,
-      runId,
-      kind,
-      channels,
-      message,
-      sentAt: new Date().toISOString(),
-      sentByName: actor.fullName,
-    });
+  d.parentUpdates.push({
+    id: uid(),
+    childId,
+    runId,
+    kind,
+    channels,
+    message,
+    sentAt: new Date().toISOString(),
+    sentByName: actor.fullName,
   });
 }
 
@@ -133,7 +148,11 @@ function placeholderDocument(path: string): string {
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }
 
-/** Can this profile see the given storage path? Mirrors the storage RLS. */
+/**
+ * Can this profile see the given storage path? Mirrors the storage policies:
+ * manager/director anywhere in their operator; crew for their own credential
+ * documents and for photos on incidents they can read.
+ */
 function canSeeDocument(p: Profile, path: string): boolean {
   if (p.role === 'manager' || p.role === 'director') return true;
   const d = getData();
@@ -192,7 +211,7 @@ export const demoApi: AegisApi = {
   async listStaffWithCredentials(): Promise<StaffMember[]> {
     const p = requireMe();
     const d = getData();
-    const rows = d.staff
+    return d.staff
       .filter((s) => {
         if (p.role === 'manager') return true;
         if (p.role === 'driver' || p.role === 'pa') return s.id === p.staffId; // own only
@@ -202,14 +221,22 @@ export const demoApi: AegisApi = {
         ...s,
         credentials: d.credentials.filter((c) => c.staffId === s.id),
       }));
-    return rows;
   },
 
   async listVehiclesWithChecks(): Promise<Vehicle[]> {
     const p = requireMe();
-    if (p.role !== 'manager' && p.role !== 'driver') return []; // RLS: vehicles_ops
     const d = getData();
-    return d.vehicles.map((v) => ({
+    // Matrix: manager all; driver/PA their own run's vehicle only; director none.
+    let allowed: (v: { id: string }) => boolean;
+    if (p.role === 'manager') {
+      allowed = () => true;
+    } else if (p.role === 'driver' || p.role === 'pa') {
+      const mine = myVehicleIds(p);
+      allowed = (v) => mine.includes(v.id);
+    } else {
+      return [];
+    }
+    return d.vehicles.filter(allowed).map((v) => ({
       ...v,
       checks: d.vehicleChecks.filter((c) => c.vehicleId === v.id),
     }));
@@ -219,7 +246,7 @@ export const demoApi: AegisApi = {
     const p = requireMe();
     if (!canSeeDocument(p, path)) return null;
     appendAudit(p, `Opened stored document`, `doc:${path}`);
-    return getData().files[path] ?? placeholderDocument(path);
+    return getFile(path) ?? placeholderDocument(path);
   },
 
   // -- runs, boarding, care plans --------------------------------------
@@ -239,21 +266,23 @@ export const demoApi: AegisApi = {
   async listBoardings(serviceDate): Promise<Boarding[]> {
     const p = requireMe();
     const d = getData();
-    const scope =
-      p.role === 'manager'
-        ? () => true
-        : p.role === 'driver' || p.role === 'pa'
-          ? (b: Boarding) => myRunIds(p).includes(b.runId)
-          : () => false; // director: none
-    return d.boardings.filter((b) => b.serviceDate === serviceDate && scope(b));
+    if (p.role === 'manager') return d.boardings.filter((b) => b.serviceDate === serviceDate);
+    if (p.role === 'driver' || p.role === 'pa') {
+      const runIds = myRunIds(p);
+      return d.boardings.filter((b) => b.serviceDate === serviceDate && runIds.includes(b.runId));
+    }
+    return []; // director: none
   },
 
   async saveBoarding(write: BoardingWrite): Promise<Boarding> {
     const p = requireMe();
     const allowed =
       p.role === 'manager' || (p.role === 'pa' && myRunIds(p).includes(write.runId));
-    if (!allowed) throw new Error(DENIED); // drivers read, never write
-    const saved = mutate((d) => {
+    if (!allowed) throw new PermissionError(); // drivers read, never write
+    const name = childName(write.childId);
+    // One mutate = one persist for the boarding row, the audit entry AND the
+    // parent update — a tap serialises the store once, not three times.
+    return mutate((d) => {
       let row = d.boardings.find(
         (b) => b.childId === write.childId && b.serviceDate === write.serviceDate,
       );
@@ -274,17 +303,15 @@ export const demoApi: AegisApi = {
         };
         d.boardings.push(row);
       }
+      if (write.state === 'onboard') {
+        appendAuditIn(d, p, `Marked on board: ${name}`, `run:${write.runId}`);
+        dispatchParentUpdateIn(d, p, write.childId, write.runId, 'onboard');
+      } else if (write.state === 'dropped') {
+        appendAuditIn(d, p, `Marked dropped off: ${name}`, `run:${write.runId}`);
+        dispatchParentUpdateIn(d, p, write.childId, write.runId, 'arrived');
+      }
       return { ...row };
     });
-    const name = childName(write.childId);
-    if (write.state === 'onboard') {
-      appendAudit(p, `Marked on board: ${name}`, `run:${write.runId}`);
-      dispatchParentUpdate(p, write.childId, write.runId, 'onboard');
-    } else if (write.state === 'dropped') {
-      appendAudit(p, `Marked dropped off: ${name}`, `run:${write.runId}`);
-      dispatchParentUpdate(p, write.childId, write.runId, 'arrived');
-    }
-    return saved;
   },
 
   async getCarePlan(childId): Promise<CarePlan | null> {
@@ -309,19 +336,41 @@ export const demoApi: AegisApi = {
     const allowed =
       p.role === 'manager' || (p.role === 'driver' && myRunIds(p).includes(child.runId));
     if (!allowed) return null; // PA and director never see name/address
-    return d.childrenPii.find((pii) => pii.childId === childId) ?? null;
+    const pii = d.childrenPii.find((row) => row.childId === childId) ?? null;
+    // Name + home address is the most sensitive read in the app — always logged.
+    if (pii) appendAudit(p, `Viewed name & address: ${child.displayName}`, `child:${childId}`);
+    return pii;
+  },
+
+  async listChildrenPII(childIds): Promise<ChildPII[]> {
+    const p = requireMe();
+    if (p.role !== 'manager' && p.role !== 'driver') return [];
+    const d = getData();
+    const runIds = p.role === 'driver' ? myRunIds(p) : null;
+    const visible = d.children.filter(
+      (c) => childIds.includes(c.id) && (runIds === null || runIds.includes(c.runId)),
+    );
+    const rows = d.childrenPii.filter((pii) => visible.some((c) => c.id === pii.childId));
+    if (rows.length > 0) {
+      const label = visible.map((c) => c.displayName).join(', ');
+      appendAudit(p, `Viewed names & addresses: ${label}`);
+    }
+    return rows;
   },
 
   // -- incidents ---------------------------------------------------------
   async listIncidents(): Promise<Incident[]> {
     const p = requireMe();
     const d = getData();
-    const rows =
-      p.role === 'manager'
-        ? d.incidents
-        : p.role === 'driver' || p.role === 'pa'
-          ? d.incidents.filter((i) => myRunIds(p).includes(i.runId))
-          : []; // director: none
+    let rows: Incident[];
+    if (p.role === 'manager') {
+      rows = d.incidents;
+    } else if (p.role === 'driver' || p.role === 'pa') {
+      const runIds = myRunIds(p);
+      rows = d.incidents.filter((i) => runIds.includes(i.runId));
+    } else {
+      rows = []; // director: none
+    }
     return [...rows].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
@@ -330,16 +379,14 @@ export const demoApi: AegisApi = {
     const allowed =
       p.role === 'manager' ||
       ((p.role === 'driver' || p.role === 'pa') && myRunIds(p).includes(write.runId));
-    if (!allowed) throw new Error(DENIED);
+    if (!allowed) throw new PermissionError();
     const id = uid();
     let photoPath: string | null = null;
     if (write.photo) {
       if (write.photo.size > 4 * 1024 * 1024) throw new Error('Photo too large (max 4 MB).');
       const dataUrl = await fileToDataUrl(write.photo);
       photoPath = `${p.operatorId}/incidents/${id}`;
-      mutate((d) => {
-        d.files[photoPath as string] = dataUrl;
-      });
+      saveFile(photoPath, dataUrl);
     }
     mutate((d) => {
       d.incidents.push({
@@ -355,24 +402,26 @@ export const demoApi: AegisApi = {
         status: 'logged',
         createdAt: new Date().toISOString(),
       });
+      appendAuditIn(d, p, `Raised incident: ${write.kind} (${write.severity})`, `incident:${id}`);
     });
-    appendAudit(p, `Raised incident: ${write.kind} (${write.severity})`, `incident:${id}`);
   },
 
   async setIncidentStatus(id, status: IncidentStatus): Promise<void> {
     const p = requireMe();
-    if (p.role !== 'manager') throw new Error(DENIED);
-    mutate((d) => {
-      const row = d.incidents.find((i) => i.id === id);
-      if (row) row.status = status;
-    });
+    if (p.role !== 'manager') throw new PermissionError();
     const labels: Record<IncidentStatus, string> = {
       logged: 'Reopened incident',
       shared_school: 'Shared incident with school',
       shared_council: 'Shared incident with council',
       closed: 'Closed incident',
     };
-    appendAudit(p, labels[status], `incident:${id}`);
+    mutate((d) => {
+      const row = d.incidents.find((i) => i.id === id);
+      if (row) {
+        row.status = status;
+        appendAuditIn(d, p, labels[status], `incident:${id}`);
+      }
+    });
   },
 
   // -- parents -----------------------------------------------------------
@@ -384,7 +433,7 @@ export const demoApi: AegisApi = {
 
   async saveParentContact(write: ParentContactWrite): Promise<void> {
     const p = requireMe();
-    if (p.role !== 'manager') throw new Error(DENIED);
+    if (p.role !== 'manager') throw new PermissionError();
     mutate((d) => {
       const existing = write.id ? d.parentContacts.find((c) => c.id === write.id) : undefined;
       if (existing) {
@@ -400,8 +449,8 @@ export const demoApi: AegisApi = {
           consentSms: write.consentSms,
         });
       }
+      appendAuditIn(d, p, `Updated parent contact for ${childName(write.childId)}`, `child:${write.childId}`);
     });
-    appendAudit(p, `Updated parent contact for ${childName(write.childId)}`, `child:${write.childId}`);
   },
 
   async listParentUpdates(): Promise<ParentUpdate[]> {
@@ -413,9 +462,11 @@ export const demoApi: AegisApi = {
   async sendParentUpdate(childId, runId, kind): Promise<void> {
     const p = requireMe();
     const allowed = p.role === 'manager' || (p.role === 'pa' && myRunIds(p).includes(runId));
-    if (!allowed) throw new Error(DENIED);
-    dispatchParentUpdate(p, childId, runId, kind);
-    appendAudit(p, `Sent "${kind}" update for ${childName(childId)}`, `child:${childId}`);
+    if (!allowed) throw new PermissionError();
+    mutate((d) => {
+      dispatchParentUpdateIn(d, p, childId, runId, kind);
+      appendAuditIn(d, p, `Sent "${kind}" update for ${childName(childId)}`, `child:${childId}`);
+    });
   },
 
   // -- commercial (director) ----------------------------------------------
@@ -427,21 +478,23 @@ export const demoApi: AegisApi = {
 
   async createInvoice(write: InvoiceWrite): Promise<void> {
     const p = requireMe();
-    if (p.role !== 'director') throw new Error(DENIED);
+    if (p.role !== 'director') throw new PermissionError();
     mutate((d) => {
       d.invoices.push({ id: uid(), ...write, status: 'draft' });
+      appendAuditIn(d, p, `Raised invoice: ${write.council} · ${write.period} · £${write.amount.toFixed(2)}`);
     });
-    appendAudit(p, `Raised invoice: ${write.council} · ${write.period} · £${write.amount.toFixed(2)}`);
   },
 
   async setInvoiceStatus(id, status: InvoiceStatus): Promise<void> {
     const p = requireMe();
-    if (p.role !== 'director') throw new Error(DENIED);
+    if (p.role !== 'director') throw new PermissionError();
     mutate((d) => {
       const row = d.invoices.find((i) => i.id === id);
-      if (row) row.status = status;
+      if (row) {
+        row.status = status;
+        appendAuditIn(d, p, `Marked invoice ${status}`, `invoice:${id}`);
+      }
     });
-    appendAudit(p, `Marked invoice ${status}`, `invoice:${id}`);
   },
 
   async listTenders(): Promise<Tender[]> {
@@ -452,21 +505,23 @@ export const demoApi: AegisApi = {
 
   async createTender(write: TenderWrite): Promise<void> {
     const p = requireMe();
-    if (p.role !== 'director') throw new Error(DENIED);
+    if (p.role !== 'director') throw new PermissionError();
     mutate((d) => {
       d.tenders.push({ id: uid(), ...write, status: 'open' });
+      appendAuditIn(d, p, `Added tender ${write.reference} (${write.council})`);
     });
-    appendAudit(p, `Added tender ${write.reference} (${write.council})`);
   },
 
   async setTenderStatus(id, status: TenderStatus): Promise<void> {
     const p = requireMe();
-    if (p.role !== 'director') throw new Error(DENIED);
+    if (p.role !== 'director') throw new PermissionError();
     mutate((d) => {
       const row = d.tenders.find((t) => t.id === id);
-      if (row) row.status = status;
+      if (row) {
+        row.status = status;
+        appendAuditIn(d, p, `Moved tender to "${status}"`, `tender:${id}`);
+      }
     });
-    appendAudit(p, `Moved tender to "${status}"`, `tender:${id}`);
   },
 
   async listDeliveredRuns(period): Promise<DeliveredRun[]> {

@@ -16,6 +16,7 @@ import type {
   Profile,
   TenderStatus,
 } from '../../lib/types';
+import { isPermanentDbError, PermissionError } from '../../lib/errors';
 import type {
   AuditRow,
   BoardingRow,
@@ -86,8 +87,14 @@ function mapIncident(i: IncidentRow): Incident {
   };
 }
 
-function fail(message: string): never {
+function fail(message: string, code?: string | null): never {
+  if (isPermanentDbError(code)) throw new PermissionError(message);
   throw new Error(message);
+}
+
+/** An RLS-denied UPDATE comes back as success with 0 rows — treat as denied. */
+function requireAffected(count: number | null | undefined, data: unknown[] | null): void {
+  if ((count ?? (data ? data.length : 0)) === 0) throw new PermissionError();
 }
 
 export const liveApi: AegisApi = {
@@ -142,7 +149,7 @@ export const liveApi: AegisApi = {
       .select(
         'id, full_name, role, credentials(id, staff_id, kind, reference, expiry_date, last_checked, verified_by, document_path)',
       );
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<StaffRow & { credentials: CredentialRow[] }>(data).map((s) => ({
       id: s.id,
       fullName: s.full_name,
@@ -166,7 +173,7 @@ export const liveApi: AegisApi = {
       .select(
         'id, reg, description, vehicle_checks(id, vehicle_id, kind, reference, expiry_date, last_checked, document_path)',
       );
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<VehicleRow & { vehicle_checks: VehicleCheckRow[] }>(data).map((v) => ({
       id: v.id,
       reg: v.reg,
@@ -197,7 +204,7 @@ export const liveApi: AegisApi = {
       .select(
         'id, name, school, council, window_text, driver_staff_id, pa_staff_id, vehicle_id, daily_rate, children(id, run_id, display_name, tag, pickup_area, scheduled_pickup)',
       );
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<RunRow & { children: ChildRow[] }>(data).map((r) => ({
       id: r.id,
       name: r.name,
@@ -226,7 +233,7 @@ export const liveApi: AegisApi = {
       .from('boardings')
       .select('*')
       .eq('service_date', serviceDate);
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<BoardingRow>(data).map(mapBoarding);
   },
 
@@ -254,7 +261,7 @@ export const liveApi: AegisApi = {
         .eq('id', existing.id)
         .select()
         .single();
-      if (error) fail(error.message);
+      if (error) fail(error.message, error.code);
       saved = data as BoardingRow;
     } else {
       const { data, error } = await supabase
@@ -269,7 +276,7 @@ export const liveApi: AegisApi = {
         })
         .select()
         .single();
-      if (error) fail(error.message);
+      if (error) fail(error.message, error.code);
       saved = data as BoardingRow;
     }
     if (write.state === 'onboard' || write.state === 'dropped') {
@@ -313,9 +320,28 @@ export const liveApi: AegisApi = {
       .eq('child_id', childId)
       .maybeSingle();
     const data = one<ChildPiiRow>(res.data);
+    // Name + home address is the most sensitive read in the app — always logged.
+    if (data) void liveApi.logAudit('Viewed name & address', `child:${childId}`);
     return data
       ? { childId: data.child_id, fullName: data.full_name, homeAddress: data.home_address }
       : null;
+  },
+
+  async listChildrenPII(childIds) {
+    if (childIds.length === 0) return [];
+    const { data, error } = await supabase
+      .from('children_pii')
+      .select('*')
+      .in('child_id', childIds);
+    if (error) fail(error.message, error.code);
+    const rows_ = rows<ChildPiiRow>(data);
+    if (rows_.length > 0)
+      void liveApi.logAudit(`Viewed names & addresses (${rows_.length} children)`);
+    return rows_.map((r) => ({
+      childId: r.child_id,
+      fullName: r.full_name,
+      homeAddress: r.home_address,
+    }));
   },
 
   // -- incidents ---------------------------------------------------------
@@ -324,7 +350,7 @@ export const liveApi: AegisApi = {
       .from('incidents')
       .select('*')
       .order('created_at', { ascending: false });
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<IncidentRow>(data).map(mapIncident);
   },
 
@@ -349,20 +375,21 @@ export const liveApi: AegisApi = {
       raised_by: profile?.id,
       raised_by_name: profile?.fullName,
     });
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     void liveApi.logAudit(`Raised incident: ${write.kind} (${write.severity})`);
   },
 
   async setIncidentStatus(id, status: IncidentStatus) {
-    const { error } = await supabase.from('incidents').update({ status }).eq('id', id);
-    if (error) fail(error.message);
+    const { data, error } = await supabase.from('incidents').update({ status }).eq('id', id).select('id');
+    if (error) fail(error.message, error.code);
+    requireAffected(null, data); // RLS-denied update = 0 rows, not an error
     void liveApi.logAudit(`Incident status → ${status}`, `incident:${id}`);
   },
 
   // -- parents -----------------------------------------------------------
   async listParentContacts() {
     const { data, error } = await supabase.from('parent_contacts').select('*');
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<ParentContactRow>(data).map((c) => ({
       id: c.id,
       childId: c.child_id,
@@ -387,7 +414,7 @@ export const liveApi: AegisApi = {
     const { error } = write.id
       ? await supabase.from('parent_contacts').update(record).eq('id', write.id)
       : await supabase.from('parent_contacts').insert(record);
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     void liveApi.logAudit('Updated parent contact', `child:${write.childId}`);
   },
 
@@ -396,7 +423,7 @@ export const liveApi: AegisApi = {
       .from('parent_updates')
       .select('*')
       .order('sent_at', { ascending: false });
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<ParentUpdateRow>(data).map((u) => ({
       id: u.id,
       childId: u.child_id,
@@ -413,14 +440,14 @@ export const liveApi: AegisApi = {
     const { error } = await supabase.functions.invoke('notify', {
       body: { child_id: childId, run_id: runId, kind },
     });
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     void liveApi.logAudit(`Sent "${kind}" update`, `child:${childId}`);
   },
 
   // -- commercial (director) ----------------------------------------------
   async listInvoices() {
     const { data, error } = await supabase.from('invoices').select('*');
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<InvoiceRow>(data).map((i) => ({
       id: i.id,
       council: i.council,
@@ -441,19 +468,20 @@ export const liveApi: AegisApi = {
       amount: write.amount,
       status: 'draft',
     });
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     void liveApi.logAudit(`Raised invoice: ${write.council} · ${write.period}`);
   },
 
   async setInvoiceStatus(id, status: InvoiceStatus) {
-    const { error } = await supabase.from('invoices').update({ status }).eq('id', id);
-    if (error) fail(error.message);
+    const { data, error } = await supabase.from('invoices').update({ status }).eq('id', id).select('id');
+    if (error) fail(error.message, error.code);
+    requireAffected(null, data);
     void liveApi.logAudit(`Marked invoice ${status}`, `invoice:${id}`);
   },
 
   async listTenders() {
     const { data, error } = await supabase.from('tenders').select('*');
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<TenderRow>(data).map((t) => ({
       id: t.id,
       reference: t.reference,
@@ -476,19 +504,20 @@ export const liveApi: AegisApi = {
       value_text: write.valueText,
       status: 'open',
     });
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     void liveApi.logAudit(`Added tender ${write.reference}`);
   },
 
   async setTenderStatus(id, status: TenderStatus) {
-    const { error } = await supabase.from('tenders').update({ status }).eq('id', id);
-    if (error) fail(error.message);
+    const { data, error } = await supabase.from('tenders').update({ status }).eq('id', id).select('id');
+    if (error) fail(error.message, error.code);
+    requireAffected(null, data);
     void liveApi.logAudit(`Moved tender to "${status}"`, `tender:${id}`);
   },
 
   async listDeliveredRuns(period) {
     const { data, error } = await supabase.rpc('delivered_days', { p_period: period });
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return rows<{
       run_id: string;
       run_name: string;
@@ -512,7 +541,7 @@ export const liveApi: AegisApi = {
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, from + pageSize - 1);
-    if (error) fail(error.message);
+    if (error) fail(error.message, error.code);
     return {
       rows: rows<AuditRow>(data).map((a) => ({
         id: a.id,

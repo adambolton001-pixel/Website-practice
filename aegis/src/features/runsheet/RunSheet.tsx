@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../../api';
 import CarePlanModal from '../../components/CarePlanModal';
 import { Chip, Empty, ErrorNote, Loading } from '../../components/ui';
@@ -26,12 +26,14 @@ export default function RunSheet() {
 
   const run = (runs.data ?? []).find((r) => r.id === active) ?? (runs.data ?? [])[0];
 
-  const piiQueries = useQueries({
-    queries: (run?.children ?? []).map((c) => ({
-      queryKey: ['childPII', c.id],
-      queryFn: () => api().getChildPII(c.id),
-    })),
+  // One batched request for the whole manifest (one audit entry, one round trip)
+  const childIds = (run?.children ?? []).map((c) => c.id);
+  const pii = useQuery({
+    queryKey: ['childrenPII', childIds.join(',')],
+    queryFn: () => api().listChildrenPII(childIds),
+    enabled: childIds.length > 0,
   });
+  const piiByChild = new Map((pii.data ?? []).map((row) => [row.childId, row]));
 
   if (runs.isPending) return <Loading />;
   if (runs.isError) return <ErrorNote message={(runs.error as Error).message} />;
@@ -91,7 +93,7 @@ export default function RunSheet() {
       <div className="card">
         {run.children.map((c, idx) => {
           const b = byChild.get(c.id);
-          const pii = piiQueries[idx]?.data;
+          const piiRow = piiByChild.get(c.id);
           const state = b?.state ?? 'waiting';
           return (
             <div className="child" key={c.id}>
@@ -100,11 +102,11 @@ export default function RunSheet() {
               </div>
               <div className="child-info">
                 <div className="child-name">
-                  {pii?.fullName ?? c.displayName}{' '}
+                  {piiRow?.fullName ?? c.displayName}{' '}
                   {c.tag && <span className="need-tag">{c.tag}</span>}
                 </div>
                 <div className="child-need">
-                  {pii?.homeAddress ?? c.pickupArea ?? '—'}
+                  {piiRow?.homeAddress ?? c.pickupArea ?? '—'}
                 </div>
                 <div className="child-stamp">
                   Due {c.scheduledPickup?.slice(0, 5) ?? '—'}

@@ -2,10 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../../api';
 import { Card, Chip, Empty, ErrorNote, Loading } from '../../components/ui';
+import { gbp, thisPeriod } from '../../lib/format';
 import { daysLeft, fmtDate } from '../../lib/status';
-
-const gbp = (n: number) => n.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
-const thisPeriod = () => new Date().toISOString().slice(0, 7);
 
 /**
  * Director overview: bids, contracts, revenue. Deliberately contains no

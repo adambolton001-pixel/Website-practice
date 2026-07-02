@@ -338,16 +338,24 @@ create policy creds_manager on credentials
 create policy creds_own on credentials
   for select using (operator_id = current_operator() and staff_id = current_staff_id());
 
+-- Matrix: "staff & vehicle compliance — driver/PA own only". Crew read the
+-- vehicle(s) on their assigned runs; only the manager sees the whole fleet.
 create policy vehicles_ops on vehicles
-  for select using (operator_id = current_operator()
-                    and current_role_aegis() in ('manager','driver'));
+  for select using (
+    operator_id = current_operator()
+    and (current_role_aegis() = 'manager'
+         or id in (select vehicle_id from runs where id in (select my_run_ids())))
+  );
 create policy vehicles_manager_write on vehicles
   for all using (operator_id = current_operator() and current_role_aegis() = 'manager')
   with check (operator_id = current_operator() and current_role_aegis() = 'manager');
 
 create policy vchecks_ops on vehicle_checks
-  for select using (operator_id = current_operator()
-                    and current_role_aegis() in ('manager','driver'));
+  for select using (
+    operator_id = current_operator()
+    and (current_role_aegis() = 'manager'
+         or vehicle_id in (select vehicle_id from runs where id in (select my_run_ids())))
+  );
 create policy vchecks_manager_write on vehicle_checks
   for all using (operator_id = current_operator() and current_role_aegis() = 'manager')
   with check (operator_id = current_operator() and current_role_aegis() = 'manager');
@@ -484,6 +492,24 @@ create policy records_read_own_upload on storage.objects
   for select using (
     bucket_id = 'records'
     and owner = auth.uid()
+  );
+
+-- Crew may also read (a) the scanned copy of their OWN credentials and
+-- (b) photos attached to incidents on their assigned runs — the same
+-- need-to-know scope as the rows those files hang off.
+create policy records_read_own_credential on storage.objects
+  for select using (
+    bucket_id = 'records'
+    and exists (select 1 from credentials c
+                where c.document_path = name
+                  and c.staff_id = current_staff_id())
+  );
+create policy records_read_run_incident on storage.objects
+  for select using (
+    bucket_id = 'records'
+    and exists (select 1 from incidents i
+                where i.photo_path = name
+                  and i.run_id in (select my_run_ids()))
   );
 
 -- =====================================================================

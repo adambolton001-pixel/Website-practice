@@ -13,15 +13,13 @@ import {
   TextInput,
 } from '../../components/ui';
 import { downloadCsv, toCsv } from '../../lib/csv';
+import { gbp, periodLabel, thisPeriod } from '../../lib/format';
 import type { DeliveredRun, Invoice, InvoiceStatus } from '../../lib/types';
 
-const gbp = (n: number | null) =>
-  n === null ? '—' : n.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
-
-const thisPeriod = () => new Date().toISOString().slice(0, 7); // YYYY-MM
-
-const periodLabel = (period: string) =>
-  new Date(period + '-01').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+const NEXT_STATUS: Partial<Record<InvoiceStatus, { to: InvoiceStatus; label: string }>> = {
+  draft: { to: 'sent', label: 'Mark sent' },
+  sent: { to: 'paid', label: 'Mark paid' },
+};
 
 export default function Invoicing() {
   const qc = useQueryClient();
@@ -173,11 +171,7 @@ function InvoiceRow({
   invoice: Invoice;
   onStatus: (s: InvoiceStatus) => void;
 }) {
-  const next: Partial<Record<InvoiceStatus, { to: InvoiceStatus; label: string }>> = {
-    draft: { to: 'sent', label: 'Mark sent' },
-    sent: { to: 'paid', label: 'Mark paid' },
-  };
-  const n = next[invoice.status];
+  const n = NEXT_STATUS[invoice.status];
   return (
     <tr>
       <td>{invoice.council}</td>

@@ -46,102 +46,119 @@ export default function Login() {
   return (
     <div className="auth-wrap">
       <div className="auth-card">
-        <div className="brand auth-brand">
-          <div className="mark" aria-hidden="true">
-            A
+        <div className="auth-side">
+          <div className="brand auth-brand">
+            <div className="mark" aria-hidden="true">
+              A
+            </div>
+            <div>
+              <div className="name">Aegis</div>
+              <div className="tag">safeguarding first</div>
+            </div>
           </div>
-          <div>
-            <div className="name" style={{ color: 'var(--ink)' }}>
-              Aegis
-            </div>
-            <div className="tag" style={{ color: 'var(--ink-faint)' }}>
-              safeguarding first
-            </div>
+          <p className="auth-thesis">
+            Every certificate watched. Every boarding recorded. <em>Every child accounted for.</em>
+          </p>
+          <p className="auth-side-sub">
+            Compliance, boarding and safeguarding for SEND home-to-school transport — with access
+            enforced by the database, not the screen.
+          </p>
+          <div className="auth-side-foot">
+            Data held in the UK
+            <br />
+            Access logged · role-based · append-only audit
           </div>
         </div>
 
-        {backendMode === 'demo' ? (
-          <>
-            <h1>Try Aegis</h1>
-            <p className="auth-sub">
-              You&apos;re in <b>demo mode</b> — one sample operator, stored only in this browser.
-              Pick a role: the backend returns only what that role is allowed to see, exactly as
-              the database policies would in production.
-            </p>
-            {error && (
-              <div className="auth-error" role="alert">
-                {error}
-              </div>
-            )}
-            {personas.map((p) => (
-              <button key={p.id} className="persona" onClick={() => void pick(p.id)} disabled={busy}>
-                <span className="avatar" aria-hidden="true">
-                  {initials(p.fullName)}
-                </span>
-                <span>
-                  <span className="persona-name">{p.fullName}</span>
-                  <br />
-                  <span className="persona-role">{ROLE_LABEL[p.role]}</span>
-                </span>
-                <span className="persona-arrow" aria-hidden="true">
-                  →
-                </span>
-              </button>
-            ))}
-            <p className="demo-note">
-              Made changes you want to undo?{' '}
-              <button
-                className="linklike"
-                onClick={() => {
-                  resetDemoData();
-                  window.location.reload();
-                }}
-              >
-                Reset the demo data
-              </button>
-              <br />
-              To connect a real backend, fill in <code>.env</code> — see the README.
-            </p>
-          </>
-        ) : (
-          <>
-            <h1>Sign in</h1>
-            <p className="auth-sub">
-              Your view is set by your role — the database only returns what your role is allowed
-              to see.
-            </p>
-            <form onSubmit={(e) => void submit(e)}>
-              <label>
-                Email
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="username"
-                  required
-                />
-              </label>
-              <label>
-                Password
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  required
-                />
-              </label>
+        <div className="auth-main">
+          {backendMode === 'demo' ? (
+            <>
+              <h1>Try Aegis</h1>
+              <p className="auth-sub">
+                You&apos;re in <b>demo mode</b> — one sample operator, stored only in this browser.
+                Pick a role: the backend returns only what that role is allowed to see, exactly as
+                the database policies would in production.
+              </p>
               {error && (
                 <div className="auth-error" role="alert">
                   {error}
                 </div>
               )}
-              <button className="btn-primary" disabled={busy}>
-                {busy ? 'Signing in…' : 'Sign in'}
-              </button>
-            </form>
-          </>
-        )}
+              {personas.map((p) => (
+                <button
+                  key={p.id}
+                  className="persona"
+                  onClick={() => void pick(p.id)}
+                  disabled={busy}
+                >
+                  <span className="avatar" aria-hidden="true">
+                    {initials(p.fullName)}
+                  </span>
+                  <span>
+                    <span className="persona-name">{p.fullName}</span>
+                    <br />
+                    <span className="persona-role">{ROLE_LABEL[p.role]}</span>
+                  </span>
+                  <span className="persona-arrow" aria-hidden="true">
+                    →
+                  </span>
+                </button>
+              ))}
+              <p className="demo-note">
+                Made changes you want to undo?{' '}
+                <button
+                  className="linklike"
+                  onClick={() => {
+                    resetDemoData();
+                    window.location.reload();
+                  }}
+                >
+                  Reset the demo data
+                </button>
+                <br />
+                To connect a real backend, fill in <code>.env</code> — see the README.
+              </p>
+            </>
+          ) : (
+            <>
+              <h1>Sign in</h1>
+              <p className="auth-sub">
+                Your view is set by your role — the database only returns what your role is allowed
+                to see.
+              </p>
+              <form onSubmit={(e) => void submit(e)}>
+                <label>
+                  Email
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="username"
+                    required
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                  />
+                </label>
+                {error && (
+                  <div className="auth-error" role="alert">
+                    {error}
+                  </div>
+                )}
+                <button className="btn-primary" disabled={busy}>
+                  {busy ? 'Signing in…' : 'Sign in'}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

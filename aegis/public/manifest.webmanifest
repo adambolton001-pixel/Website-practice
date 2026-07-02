@@ -1,0 +1,14 @@
+{
+  "name": "Aegis — SEND transport",
+  "short_name": "Aegis",
+  "description": "Compliance, boarding and safeguarding for SEND home-to-school transport operators.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F1EA",
+  "theme_color": "#084A48",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

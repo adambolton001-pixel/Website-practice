@@ -1,0 +1,26 @@
+name: Aegis CI
+
+on:
+  push:
+    paths: ['aegis/**', '.github/workflows/aegis-ci.yml']
+  pull_request:
+    paths: ['aegis/**', '.github/workflows/aegis-ci.yml']
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aegis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: aegis/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

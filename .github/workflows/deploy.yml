@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, "claude/eager-goodall-1nauhx"]
+    branches: [main, "claude/eager-goodall-1nauhx", "claude/fully-working-version-xsbt79"]
 
 permissions:
   contents: read
@@ -21,9 +21,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: aegis/package-lock.json
+      # Build the Aegis app (demo mode — no env vars, no secrets in the build)
+      - run: npm ci
+        working-directory: aegis
+      - run: npm run build
+        working-directory: aegis
+      # Assemble the site: static pages at the root, Aegis at /aegis/
+      - name: Assemble site
+        run: |
+          mkdir -p _site/aegis
+          find . -maxdepth 1 \( -name '*.html' -o -name '*.css' -o -name '*.js' \) -exec cp {} _site/ \;
+          cp -r aegis/dist/. _site/aegis/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

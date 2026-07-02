@@ -260,3 +260,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .auth-main{padding:26px 22px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── finance (director) — dark data cards, ref: web3 dashboard ─────── */
+.fin-card{background:var(--forest);color:#DCE7DE;border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow-2)}
+.fin-cap{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:#7E948A;font-weight:700}
+.fin-num{font-family:var(--display);font-size:32px;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1.15;margin-top:6px;font-variant-numeric:tabular-nums}
+.fin-sub{font-size:12px;color:#9DB0A4;margin-top:4px}
+.fin-chart{padding-bottom:16px}
+.linklike.lime{color:var(--lime)}
+.hbar-row{cursor:default}
+.hbar-row:hover path{opacity:.85}
+@media (max-width:860px){.fin-num{font-size:27px}}

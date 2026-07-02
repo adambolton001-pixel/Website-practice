@@ -69,6 +69,30 @@ export default function Invoicing() {
         </p>
       </div>
 
+      <div className="grid cols-3" style={{ marginBottom: 24 }}>
+        <div className="fin-card">
+          <div className="fin-cap">Outstanding</div>
+          <div className="fin-num">
+            {gbp((invoices.data ?? []).filter((i) => i.status === 'sent').reduce((s, i) => s + (i.amount ?? 0), 0))}
+          </div>
+          <div className="fin-sub">sent, awaiting payment</div>
+        </div>
+        <div className="fin-card">
+          <div className="fin-cap">Collected</div>
+          <div className="fin-num">
+            {gbp((invoices.data ?? []).filter((i) => i.status === 'paid').reduce((s, i) => s + (i.amount ?? 0), 0))}
+          </div>
+          <div className="fin-sub">paid invoices to date</div>
+        </div>
+        <div className="fin-card">
+          <div className="fin-cap">Drafts</div>
+          <div className="fin-num">
+            {(invoices.data ?? []).filter((i) => i.status === 'draft').length}
+          </div>
+          <div className="fin-sub">ready to send</div>
+        </div>
+      </div>
+
       <div className="section-title">Delivered this month · {periodLabel(period)}</div>
       <Card>
         <div className="table-wrap">

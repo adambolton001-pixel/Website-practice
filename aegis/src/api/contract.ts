@@ -96,6 +96,8 @@ export interface AegisApi {
   // -- runs, boarding, care plans --------------------------------------
   listRuns(): Promise<Run[]>;
   listBoardings(serviceDate: string): Promise<Boarding[]>;
+  /** children safely dropped per service date, most recent `days` days (counts only) */
+  listBoardingSeries(days: number): Promise<{ date: string; dropped: number }[]>;
   saveBoarding(write: BoardingWrite): Promise<Boarding>;
   getCarePlan(childId: string): Promise<CarePlan | null>;
   getChildPII(childId: string): Promise<ChildPII | null>;

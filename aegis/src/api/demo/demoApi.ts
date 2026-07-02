@@ -274,6 +274,33 @@ export const demoApi: AegisApi = {
     return []; // director: none
   },
 
+  async listBoardingSeries(days): Promise<{ date: string; dropped: number }[]> {
+    const p = requireMe();
+    const d = getData();
+    const scope =
+      p.role === 'manager'
+        ? () => true
+        : p.role === 'driver' || p.role === 'pa'
+          ? (() => {
+              const runIds = myRunIds(p);
+              return (b: Boarding) => runIds.includes(b.runId);
+            })()
+          : () => false;
+    const out: { date: string; dropped: number }[] = [];
+    for (let off = days - 1; off >= 0; off--) {
+      const day = new Date();
+      day.setHours(0, 0, 0, 0);
+      day.setDate(day.getDate() - off);
+      const iso = day.toISOString().slice(0, 10);
+      out.push({
+        date: iso,
+        dropped: d.boardings.filter((b) => b.serviceDate === iso && b.state === 'dropped' && scope(b))
+          .length,
+      });
+    }
+    return out;
+  },
+
   async saveBoarding(write: BoardingWrite): Promise<Boarding> {
     const p = requireMe();
     const allowed =

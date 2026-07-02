@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../../api';
 import { useAuth } from '../../auth/AuthProvider';
+import { MARK_LIGHT, Spark } from '../../components/charts';
 import { Card, Chip, Empty, ErrorNote, Loading } from '../../components/ui';
 import { daysLeft, expLabel, statusOf, todayISO } from '../../lib/status';
 
@@ -113,6 +114,10 @@ function ManagerDashboard() {
     queryKey: ['boardings', todayISO()],
     queryFn: () => api().listBoardings(todayISO()),
   });
+  const series = useQuery({
+    queryKey: ['boardingSeries', 14],
+    queryFn: () => api().listBoardingSeries(14),
+  });
 
   if (staff.isPending || vehicles.isPending) return <Loading />;
   if (staff.isError || vehicles.isError)
@@ -165,7 +170,7 @@ function ManagerDashboard() {
         </div>
       </div>
 
-      <div className="grid cols-2" style={{ marginTop: 16 }}>
+      <div className="grid cols-3" style={{ marginTop: 16 }}>
         <div className="stat">
           <div className="num">{onBoardNow}</div>
           <div className="cap">children on board right now</div>
@@ -173,6 +178,19 @@ function ManagerDashboard() {
         <div className={'stat ' + (openIncidents ? 'amber' : 'green')}>
           <div className="num">{openIncidents}</div>
           <div className="cap">open incidents</div>
+        </div>
+        <div className="stat">
+          {series.data && series.data.length > 0 ? (
+            <Spark
+              values={series.data.map((s) => s.dropped)}
+              mark={MARK_LIGHT}
+              ariaLabel={`Children taken safely to school per day over the last 14 days; latest ${series.data[series.data.length - 1]?.dropped ?? 0}`}
+              lastLabel={String(series.data[series.data.length - 1]?.dropped ?? 0)}
+            />
+          ) : (
+            <div className="num">—</div>
+          )}
+          <div className="cap">safely to school · last 14 days</div>
         </div>
       </div>
 

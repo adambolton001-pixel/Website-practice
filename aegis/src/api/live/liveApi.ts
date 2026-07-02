@@ -237,6 +237,28 @@ export const liveApi: AegisApi = {
     return rows<BoardingRow>(data).map(mapBoarding);
   },
 
+  async listBoardingSeries(days) {
+    const since = new Date();
+    since.setDate(since.getDate() - (days - 1));
+    const { data, error } = await supabase
+      .from('boardings')
+      .select('service_date, state')
+      .gte('service_date', since.toISOString().slice(0, 10));
+    if (error) fail(error.message, error.code);
+    const counts = new Map<string, number>();
+    for (const b of rows<{ service_date: string; state: string }>(data)) {
+      if (b.state === 'dropped') counts.set(b.service_date, (counts.get(b.service_date) ?? 0) + 1);
+    }
+    const out: { date: string; dropped: number }[] = [];
+    for (let off = days - 1; off >= 0; off--) {
+      const day = new Date();
+      day.setDate(day.getDate() - off);
+      const iso = day.toISOString().slice(0, 10);
+      out.push({ date: iso, dropped: counts.get(iso) ?? 0 });
+    }
+    return out;
+  },
+
   async saveBoarding(write: BoardingWrite) {
     const profile = await myProfile();
     const existingRes = await supabase
